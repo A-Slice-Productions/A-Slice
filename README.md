@@ -6,7 +6,7 @@ h slice but it has the best optiomzation optimization It has the&nbsp;&nbsp;&nbs
     <img src="/art/desktop/iconOG.png" alt="H-Slice" width="150">
   </a>
   <br>
-  <b>H-Slice Engine</b>
+  <b>H-Slice+JS Engine</b>
   <br>
 </h1>
 
@@ -20,12 +20,12 @@ h slice but it has the best optiomzation optimization It has the&nbsp;&nbsp;&nbs
 
 ## Introduction
 
-Welcome to **H-Slice** (HRK Engine Redux), a Friday Night Funkin' engine optimized for handling large charts efficiently.
+Welcome to **H-Slice+JS** (formerly H-Slice), a Friday Night Funkin' engine optimized for handling large charts efficiently.
 
 This engine builds upon features from my previous engine and may include new features in the future.
 
 ### *If you plan to integrate my features into your own engine,*
-### *Please contact to hrk first and CREDIT H-SLICE.*
+### *Please contact to hrk first and CREDIT H-SLICE+JS.*
 
 **Note:** This engine is designed for playing large, unplayable charts using BOTPLAY. It is not intended for regular gameplay.
 
