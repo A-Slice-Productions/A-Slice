@@ -155,7 +155,51 @@ class Song
 		if(NativeFileSystem.exists(_lastPath))
 			rawData = NativeFileSystem.getContent(_lastPath);
 
-		return rawData != null ? parseJSON(rawData, jsonInput) : null;
+		if(rawData == null) return null;
+
+		// Parse the base JSON file first (e.g., example.json)
+		var baseSong:SwagSong = parseJSON(rawData, jsonInput);
+
+		// Loop to find and merge split parts automatically
+		var partNum:Int = 2;
+		while(true)
+		{
+			var partData:String = null;
+			
+			// Pattern A: example-2.json
+			var pathPatternA:String = Paths.json('$formattedFolder/$formattedSong-$partNum');
+			// Pattern B: example-part2.json
+			var pathPatternB:String = Paths.json('$formattedFolder/$formattedSong-part$partNum');
+			
+			if(NativeFileSystem.exists(pathPatternA)) {
+				partData = NativeFileSystem.getContent(pathPatternA);
+			} else if(NativeFileSystem.exists(pathPatternB)) {
+				partData = NativeFileSystem.getContent(pathPatternB);
+			}
+
+			// If a split file is found, parse it and append its contents
+			if(partData != null) {
+				var partSong:SwagSong = parseJSON(partData, jsonInput);
+				if(partSong != null) {
+					// Merge notes
+					if(partSong.notes != null) {
+						if(baseSong.notes == null) baseSong.notes = [];
+						baseSong.notes = baseSong.notes.concat(partSong.notes);
+					}
+					// Merge events
+					if(partSong.events != null) {
+						if(baseSong.events == null) baseSong.events = [];
+						baseSong.events = baseSong.events.concat(partSong.events);
+					}
+				}
+				partNum++; // Move to the next part (e.g., -3 or -part3)
+			} else {
+				// No more sequential split parts found, stop looking
+				break;
+			}
+		}
+
+		return baseSong;
 	}
 
 	public static function parseJSON(rawData:String, ?nameForError:String = null, ?convertTo:String = 'psych_v1'):SwagSong
