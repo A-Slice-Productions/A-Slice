@@ -7,6 +7,8 @@ import lime.utils.Assets;
 
 import objects.Note;
 
+using StringTools;
+
 typedef SwagSong =
 {
 	var song:String;
@@ -237,5 +239,91 @@ class Song
 			}
 		}
 		return songJson;
+	}
+
+	// Call this function from your ChartingState whenever you save a song
+	public static function saveChart(songData:SwagSong, jsonInput:String, ?folder:String):Void
+	{
+		if(folder == null) folder = jsonInput;
+		var formattedFolder:String = Paths.formatToSongPath(folder);
+		var formattedSong:String = Paths.formatToSongPath(jsonInput);
+
+		// 1.99 GB threshold in bytes. (Change this to something small like 2 * 1024 * 1024 for testing!)
+		var maxBytes:Float = 1.99 * 1024 * 1024 * 1024; 
+
+		// Create a dynamic template containing everything EXCEPT notes and events
+		var template:Dynamic = {};
+		for(field in Reflect.fields(songData)) {
+			if(field != "notes" && field != "events") {
+				Reflect.setField(template, field, Reflect.field(songData, field));
+			}
+		}
+
+		var totalSections:Int = (songData.notes != null) ? songData.notes.length : 0;
+		var totalEvents:Int = (songData.events != null) ? songData.events.length : 0;
+
+		var currentPart:Int = 1;
+		var sectionIndex:Int = 0;
+		var eventIndex:Int = 0;
+
+		// Keep filling up chunks until all data points are assigned to a file
+		while(sectionIndex < totalSections || eventIndex < totalEvents)
+		{
+			var chunk:SwagSong = cast Reflect.copy(template);
+			chunk.notes = [];
+			chunk.events = [];
+
+			var currentBytes:Int = 0;
+
+			while(sectionIndex < totalSections || eventIndex < totalEvents)
+			{
+				if(sectionIndex < totalSections) {
+					chunk.notes.push(songData.notes[sectionIndex]);
+					sectionIndex++;
+				}
+				if(eventIndex < totalEvents) {
+					chunk.events.push(songData.events[eventIndex]);
+					eventIndex++;
+				}
+
+				// Generate test string wrapped under the standard "song" object layout
+				var wrappedData:Dynamic = { song: chunk };
+				var checkString:String = haxe.Json.stringify(wrappedData, null, "\t");
+				
+				currentBytes = haxe.io.Bytes.ofString(checkString).length;
+
+				// If we step over the targeted boundary, halt this part and leave remaining elements for the next file
+				if(currentBytes >= maxBytes && (sectionIndex < totalSections || eventIndex < totalEvents)) {
+					break;
+				}
+			}
+
+			// Format proper naming paths depending on file sequence
+			var path:String = "";
+			if(currentPart == 1) {
+				path = Paths.json('$formattedFolder/$formattedSong');
+			} else {
+				path = Paths.json('$formattedFolder/$formattedSong-$currentPart');
+			}
+
+			#if windows
+			path = path.replace('/', '\\');
+			#end
+
+			var finalWrapped:Dynamic = { song: chunk };
+			var finalJsonStr:String = haxe.Json.stringify(finalWrapped, null, "\t");
+
+			#if sys
+			sys.io.File.saveContent(path, finalJsonStr);
+			#else
+			NativeFileSystem.saveContent(path, finalJsonStr); 
+			#end
+
+			currentPart++;
+		}
+		
+		#if debug
+		trace('Chart successfully split and saved across ' + (currentPart - 1) + ' files.');
+		#end
 	}
 }
