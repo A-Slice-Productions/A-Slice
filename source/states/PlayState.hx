@@ -30,6 +30,10 @@ import flixel.FlxSubState;
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
 import flixel.util.FlxSave;
+import flixel.util.FlxColor;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxTween;
 import flixel.input.keyboard.FlxKey;
 import lime.utils.Assets;
 import openfl.utils.Assets as OpenFlAssets;
@@ -819,6 +823,8 @@ class PlayState extends MusicBeatState
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		scoreTxt.antialiasing = ClientPrefs.data.antialiasing;
+		scoreTxt.background = true;
+		scoreTxt.backgroundColor = FlxColor.fromRGB(0, 0, 0, 128);
 		updateScore();
 		uiGroup.add(scoreTxt);
 		
@@ -1660,12 +1666,16 @@ class PlayState extends MusicBeatState
 
 			tempScoreStr = Language.getPhrase(
 				'score_text_bot',
-				'Notes: {2} + {3} = {4} | HP: {5}',
-				[ songScore, opComboStr, comboStr, notesStr, hpShowStr ]
+				'{2} + {3} = {4}',
+				[ songScore, opComboStr, comboStr, notesStr ]
 			);
 			
 		}
 		scoreTxt.text = tempScoreStr;
+		var scoreWidth:Int = Std.int(Math.max(180, scoreTxt.text.length * 12 + 24));
+		scoreTxt.fieldWidth = scoreWidth;
+		scoreTxt.screenCenter(X);
+		scoreTxt.y = healthBar.y + 30;
 	}
 
 	public dynamic function fullComboFunction()
