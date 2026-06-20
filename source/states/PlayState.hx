@@ -823,8 +823,6 @@ class PlayState extends MusicBeatState
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		scoreTxt.antialiasing = ClientPrefs.data.antialiasing;
-		scoreTxt.background = true;
-		scoreTxt.backgroundColor = FlxColor.fromRGB(0, 0, 0, 128);
 		updateScore();
 		uiGroup.add(scoreTxt);
 		
