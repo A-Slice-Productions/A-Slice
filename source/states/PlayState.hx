@@ -32,7 +32,6 @@ import flixel.util.FlxStringUtil;
 import flixel.util.FlxSave;
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
-import flixel.text.FlxTextBorderStyle;
 import flixel.tweens.FlxTween;
 import flixel.input.keyboard.FlxKey;
 import lime.utils.Assets;
@@ -742,7 +741,9 @@ class PlayState extends MusicBeatState
 		Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
 		var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
 		timeTxt = new FlxText(FlxG.width / 4, 19, FlxG.width / 2, "", 32);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
+		timeTxt.borderSize = 1;
+		timeTxt.borderColor = FlxColor.BLACK;
 		timeTxt.scrollFactor.set();
 		timeTxt.alpha = 0;
 		timeTxt.borderSize = 2;
@@ -818,7 +819,9 @@ class PlayState extends MusicBeatState
 		uiGroup.add(iconP2);
 
 		scoreTxt = new FlxText(0, healthBar.y + 30, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER);
+		scoreTxt.borderSize = 1;
+		scoreTxt.borderColor = FlxColor.BLACK;
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
@@ -827,7 +830,9 @@ class PlayState extends MusicBeatState
 		uiGroup.add(scoreTxt);
 		
 		infoTxt = new FlxText(0, downScroll ? healthBar.y + 64 : healthBar.y - 48, FlxG.width, "", 32);
-		infoTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		infoTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
+		infoTxt.borderSize = 1;
+		infoTxt.borderColor = FlxColor.BLACK;
 		infoTxt.scrollFactor.set();
 		infoTxt.borderSize = 1.25;
 		infoTxt.visible = true;
@@ -844,7 +849,9 @@ class PlayState extends MusicBeatState
 		}
 
 		botplayTxt = new FlxText(0, botplayTxtY, FlxG.width, Language.getPhrase("Botplay").toUpperCase(), 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
+		botplayTxt.borderSize = 1;
+		botplayTxt.borderColor = FlxColor.BLACK;
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.visible = cpuControlled;
