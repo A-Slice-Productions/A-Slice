@@ -59,6 +59,8 @@ import states.InitState;
         public var disableGC:Bool = false;
         public var singleNoteToGroup:Bool = true;
         public var mergeThreshold:Int = 500;
+        public var mergeDistance:Float = 2.0; // NEW: pixels between notes to merge
+        public var maxNotesBeforeMerge:Int = 100; // NEW: your slider
 
         // Graphic Settings
         public var lowQuality:Bool = false;
