@@ -2686,6 +2686,14 @@ class PlayState extends MusicBeatState
                                         while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] < start) { playerStart = m + 1; lo = m + 1; } else hi = m - 1; }
                                         var playerNPS = playerCount - playerStart;
                                         
+                                        // include ghost note density
+                                        var densityFactor = 1.0;
+                                        if (andreVisibleTotalNotes > 0) {
+                                                densityFactor = andreActualTotalNotes / andreVisibleTotalNotes;
+                                        }
+                                        oppNPS = Math.floor(oppNPS * densityFactor);
+                                        playerNPS = Math.floor(playerNPS * densityFactor);
+                                        
                                         // update NPS displays
                                         andreOppNpsText.text = andreFormat(oppNPS) + " | " + andreFormat(andreMaxOppNPS);
                                         andrePlayerNpsText.text = andreFormat(playerNPS) + " | " + andreFormat(andreMaxPlayerNPS);
