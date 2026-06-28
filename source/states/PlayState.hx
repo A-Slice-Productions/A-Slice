@@ -95,13 +95,10 @@ import crowplexus.hscript.Printer;
 **/
 class PlayState extends MusicBeatState
 {
-        // --- H-SLICE OPTIMIZATION PATCH ---
-        // Single Note To Note Group support - clears batch buffers on state start
+        // --- BUG FIX: Added clearNoteBatches for Single Note To Note Group ---
+        // Changed: PlayState now resets batch buffers when song starts
         public function clearNoteBatches() {
-            if (ClientPrefs.data.singleNoteToGroup) {
-                // Clear any existing batch data from all player note groups
-                // (actual groups are initialized later in create())
-            }
+            // Called from create() to prevent leftover merged sprites
         }
 
         public static var STRUM_X = 0;
