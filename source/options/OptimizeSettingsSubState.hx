@@ -71,30 +71,9 @@ class OptimizeSettingsSubState extends BaseOptionsMenu
                 addOption(option);
 
                 var option:Option = new Option('Single Note To Note Group',
-                        "If checked: Merges notes that are visually touching into 1 image.\nFixes 421 note limit + boosts FPS on black MIDIs.",
+                        "If checked: Merges consecutive notes into 1 long image instead of thousands of sprites.\nMassively improves FPS on charts with 1M+ notes.\nMerges only when note count exceeds mergeThreshold.",
                         'singleNoteToGroup',
                         BOOL);
-                addOption(option);
-
-        var option:Option = new Option('Max Notes Before Merge:',
-                        "How many close-together notes to allow before merging into 1 image.\n0 = merge instantly, 100 = default, 421 = engine cap.",
-                        'maxNotesBeforeMerge',
-                        INT);
-                option.scrollSpeed = 10;
-                option.minValue = 0;
-                option.maxValue = 1000;
-                option.changeValue = 5;
-                option.displayFormat = '%v notes';
-                addOption(option);
-
-        var option:Option = new Option('Merge Distance:',
-                        "How close notes must be (in pixels) to merge.\n2.0 = touching, 10.0 = small gap allowed",
-                        'mergeDistance',
-                        FLOAT);
-                option.minValue = 0.5;
-                option.maxValue = 20.0;
-                option.changeValue = 0.5;
-                option.displayFormat = '%.1f px';
                 addOption(option);
 
                 var option:Option = new Option('Max Notes Shown:',
@@ -185,6 +164,12 @@ class OptimizeSettingsSubState extends BaseOptionsMenu
         var option:Option = new Option('Disable Garbage Collector',
                         "If checked, You can play the main game without GC lag.\nIt only works on loading/playing charts.",
                         'disableGC',
+                        BOOL);
+                addOption(option);
+
+        var option:Option = new Option('Use AndreJr HUD (Haxe)',
+                        "If checked, uses built-in AndreJr HUD instead of Lua.\nNo Lua script needed, runs inside PlayState.",
+                        'useAndreHUD',
                         BOOL);
                 addOption(option);
 
