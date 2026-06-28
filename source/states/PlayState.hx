@@ -217,6 +217,8 @@ class PlayState extends MusicBeatState
         public var andreOppHits:Array<Float> = [];
         public var andreMaxPlayerNPS:Int = 0;
         public var andreMaxOppNPS:Int = 0;
+        public var andreActualTotalNotes:Int = 0;
+        public var andreVisibleTotalNotes:Int = 0;
         // Format numbers with commas: 1000 -> 1,000
         function andreFormat(num:Float):String {
                 var n = Math.floor(num);
@@ -1106,6 +1108,15 @@ class PlayState extends MusicBeatState
 
                 // --- AndreJr HUD Init ---
                 andreHUDEnabled = ClientPrefs.data.useAndreHUD;
+                // Calculate actual total notes for density display
+                andreActualTotalNotes = 0;
+                if (SONG != null && SONG.notes != null) {
+                        for (section in SONG.notes) {
+                                if (section != null && section.sectionNotes != null) {
+                                        andreActualTotalNotes += section.sectionNotes.length;
+                                }
+                        }
+                }
                 if (andreHUDEnabled) {
                         // Hide default UI
                         if (healthBar != null) healthBar.visible = false;
@@ -1187,6 +1198,8 @@ class PlayState extends MusicBeatState
                         andreStatsText.cameras = [camOther];
                         andreStatsText.scrollFactor.set();
                         add(andreStatsText);
+                        andreVisibleTotalNotes = andreActualTotalNotes - ghostNotesCaught;
+                        if (andreVisibleTotalNotes < 1) andreVisibleTotalNotes = 1;
                 }
         }
 
