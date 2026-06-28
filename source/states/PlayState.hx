@@ -217,6 +217,24 @@ class PlayState extends MusicBeatState
         public var andreOppHits:Array<Float> = [];
         public var andreMaxPlayerNPS:Int = 0;
         public var andreMaxOppNPS:Int = 0;
+        // Format numbers with commas: 1000 -> 1,000
+        function andreFormat(num:Float):String {
+                var n = Math.floor(num);
+                var s = Std.string(n);
+                var len = s.length;
+                var result = "";
+                var count = 0;
+                for (i in 0...len) {
+                        var c = s.charAt(len - 1 - i);
+                        if (count == 3) {
+                                result = "," + result;
+                                count = 0;
+                        }
+                        result = c + result;
+                        count++;
+                }
+                return result;
+        }
 
         public var camFollow:FlxObject;
 
@@ -2612,19 +2630,28 @@ class PlayState extends MusicBeatState
                         if (isBot) {
                                 // 0 + 0 = 0 format - THIS IS YOUR COMBO
                                 var total = andreOppNotes + andrePlayerNotes;
-                                andreCounterText.text = andreOppNotes + " + " + andrePlayerNotes + " = " + total;
+                                if (ClientPrefs.data.ghostDensity) {
+                                        // Show actual note count instead of removed version
+                                        var total = andreOppNotes + andrePlayerNotes;
+                                        var progress = total / andreVisibleTotalNotes;
+                                        if (progress > 1) progress = 1;
+                                        var currentActual = Math.floor(progress * andreActualTotalNotes);
+                                        andreCounterText.text = andreFormat(currentActual) + " / " + andreFormat(andreActualTotalNotes);
+                                } else {
+                                        andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(total);
+                                }
                                 andreCounterText.x = (FlxG.width - andreCounterText.width) / 2;
                                 andreCounterBox.setGraphicSize(Std.int(andreCounterText.width + 20), Std.int(andreCounterText.height + 10));
                                 andreCounterBox.updateHitbox();
                                 andreCounterBox.x = andreCounterText.x - 10;
                                 andreCounterBox.y = andreCounterText.y - 5;
 
-                                andreOppNpsText.text = oppNPS + " | " + andreMaxOppNPS;
+                                andreOppNpsText.text = andreFormat(oppNPS) + " | " + andreFormat(andreMaxOppNPS);
                                 andreOppBox.setGraphicSize(Std.int(andreOppNpsText.width + 20), Std.int(andreOppNpsText.height + 10));
                                 andreOppBox.updateHitbox();
                                 andreOppBox.y = andreOppNpsText.y - 5;
 
-                                andrePlayerNpsText.text = playerNPS + " | " + andreMaxPlayerNPS;
+                                andrePlayerNpsText.text = andreFormat(playerNPS) + " | " + andreFormat(andreMaxPlayerNPS);
                                 andrePlayerNpsText.x = FlxG.width - andrePlayerNpsText.width - 20;
                                 andrePlayerBox.setGraphicSize(Std.int(andrePlayerNpsText.width + 20), Std.int(andrePlayerNpsText.height + 10));
                                 andrePlayerBox.updateHitbox();
@@ -2650,7 +2677,7 @@ class PlayState extends MusicBeatState
 
                                 var acc = Math.floor(ratingPercent * 100);
                                 var hp = Math.floor(health * 50);
-                                andreStatsText.text = "Score: " + songScore + " | Misses: " + songMisses + " | Accuracy: " + acc + "% | Health: " + hp + "%";
+                                andreStatsText.text = "Score: " + andreFormat(songScore) + " | Misses: " + andreFormat(songMisses) + " | Accuracy: " + acc + "% | Health: " + hp + "%";
                                 andreStatsText.screenCenter(X);
                                 andreStatsBox.setGraphicSize(Std.int(andreStatsText.width + 20), Std.int(andreStatsText.height + 10));
                                 andreStatsBox.updateHitbox();
