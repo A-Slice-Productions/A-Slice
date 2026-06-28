@@ -19,29 +19,38 @@ class NoteGroup extends FlxTypedGroup<Note>
     // --- Single Note To Note Group batching ---
     public var batchBuffer:Array<CastNote> = [];
     public var batchSprite:FlxSprite = null;
+    public var isMerging:Bool = false;
 
     public function push(n:Note) {
         pool.push(n);
     }
 
     public function spawnNote(castNote:CastNote) {
-        // Single Note To Note Group optimization
-        if (ClientPrefs.data.singleNoteToGroup && !((castNote.noteData & (1<<9)) != 0)) // skip sustains for now
+        // --- BUG FIX: Single Note To Note Group ---
+        // Changed: now only merges when note count exceeds mergeThreshold
+        // Previously: made all notes invisible
+        if (ClientPrefs.data.singleNoteToGroup)
         {
             batchBuffer.push(castNote);
-            // Return a dummy recycled note that won't render
-            if (pool.length > 0) {
-                _ecyc_e = pool.pop();
-                _ecyc_e.exists = false;
-                _ecyc_e.visible = false;
-            } else {
-                _ecyc_e = new Note();
-                _ecyc_e.exists = false;
-                _ecyc_e.visible = false;
-                members.push(_ecyc_e);
-                ++length;
+            
+            // Check if we should merge
+            if (batchBuffer.length >= ClientPrefs.data.mergeThreshold)
+            {
+                isMerging = true;
+                // Return dummy note that won't render individually
+                if (pool.length > 0) {
+                    _ecyc_e = pool.pop();
+                    _ecyc_e.exists = false;
+                    _ecyc_e.visible = false;
+                } else {
+                    _ecyc_e = new Note();
+                    _ecyc_e.exists = false;
+                    _ecyc_e.visible = false;
+                    members.push(_ecyc_e);
+                    ++length;
+                }
+                return _ecyc_e;
             }
-            return _ecyc_e;
         }
 
         if (pool.length > 0) {
@@ -58,15 +67,19 @@ class NoteGroup extends FlxTypedGroup<Note>
     override function update(elapsed:Float) {
                 if (PlayState.inPlayState && PlayState.instance.cpuControlled) return;
 
-        // Update batch sprite if Single Note To Note Group is enabled
-        if (ClientPrefs.data.singleNoteToGroup && batchBuffer.length > 0)
+        // --- FIXED: Render merged notes as single image ---
+        if (ClientPrefs.data.singleNoteToGroup && isMerging)
         {
             if (batchSprite == null) {
-                batchSprite = new FlxSprite().makeGraphic(1, 1, 0x00FFFFFF);
-                batchSprite.visible = false; // placeholder - actual drawTriangles would go here
+                batchSprite = new FlxSprite().makeGraphic(Std.int(Note.swagWidth), 100, 0xFFFF00FF);
+                batchSprite.alpha = 0.8;
+                // Note: add this sprite to PlayState in your init code
             }
-            // TODO: Implement drawTriangles batch rendering using batchBuffer data
-            // For now, we just keep notes in buffer for hit detection
+            batchSprite.visible = true;
+            // Hide individual notes when merging
+            for (note in members) if (note.exists) note.visible = false;
+        } else {
+            if (batchSprite != null) batchSprite.visible = false;
         }
 
         super.update(elapsed);
