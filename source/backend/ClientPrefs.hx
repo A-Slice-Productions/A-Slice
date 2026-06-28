@@ -58,6 +58,7 @@ import states.InitState;
         public var spawnNoteEvent:Bool = true;
         public var disableGC:Bool = false;
         public var singleNoteToGroup:Bool = true;
+        public var mergeThreshold:Int = 500;
 
         // Graphic Settings
         public var lowQuality:Bool = false;
