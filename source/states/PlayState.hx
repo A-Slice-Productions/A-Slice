@@ -99,6 +99,11 @@ class PlayState extends MusicBeatState
         // Changed: PlayState now resets batch buffers when song starts
         public function clearNoteBatches() {
             // Called from create() to prevent leftover merged sprites
+            if (notes != null) {
+                notes.batchBuffer = [];
+                notes.isMerging = false;
+                if (notes.batchSprite != null) notes.batchSprite.visible = false;
+            }
         }
 
         public static var STRUM_X = 0;
