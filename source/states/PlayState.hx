@@ -1108,56 +1108,66 @@ class PlayState extends MusicBeatState
                         // counter (botplay)
                         andreCounterBox = new FlxSprite(0, 20).makeGraphic(10, 10, FlxColor.BLACK);
                         andreCounterBox.alpha = BOX_ALPHA;
-                        andreCounterBox.cameras = [camHUD];
+                        andreCounterBox.cameras = [camOther];
+                        andreCounterBox.scrollFactor.set();
                         add(andreCounterBox);
 
                         andreCounterText = new FlxText(0, 30, 0, "", TEXT_SIZE);
                         andreCounterText.setFormat(Paths.font("vcr.ttf"), TEXT_SIZE, FlxColor.WHITE, CENTER);
-                        andreCounterText.cameras = [camHUD];
+                        andreCounterText.cameras = [camOther];
+                        andreCounterText.scrollFactor.set();
                         add(andreCounterText);
 
                         // opp NPS left
                         andreOppBox = new FlxSprite(10, FlxG.height - 45).makeGraphic(10, 10, FlxColor.BLACK);
                         andreOppBox.alpha = BOX_ALPHA;
-                        andreOppBox.cameras = [camHUD];
+                        andreOppBox.cameras = [camOther];
+                        andreOppBox.scrollFactor.set();
                         add(andreOppBox);
 
                         andreOppNpsText = new FlxText(20, FlxG.height - 40, 0, "", NPS_SIZE);
                         andreOppNpsText.setFormat(Paths.font("vcr.ttf"), NPS_SIZE, FlxColor.WHITE, LEFT);
-                        andreOppNpsText.cameras = [camHUD];
+                        andreOppNpsText.cameras = [camOther];
+                        andreOppNpsText.scrollFactor.set();
                         add(andreOppNpsText);
 
                         // player NPS right
                         andrePlayerBox = new FlxSprite(0, FlxG.height - 45).makeGraphic(10, 10, FlxColor.BLACK);
                         andrePlayerBox.alpha = BOX_ALPHA;
-                        andrePlayerBox.cameras = [camHUD];
+                        andrePlayerBox.cameras = [camOther];
+                        andrePlayerBox.scrollFactor.set();
                         add(andrePlayerBox);
 
                         andrePlayerNpsText = new FlxText(0, FlxG.height - 40, 0, "", NPS_SIZE);
                         andrePlayerNpsText.setFormat(Paths.font("vcr.ttf"), NPS_SIZE, FlxColor.WHITE, RIGHT);
-                        andrePlayerNpsText.cameras = [camHUD];
+                        andrePlayerNpsText.cameras = [camOther];
+                        andrePlayerNpsText.scrollFactor.set();
                         add(andrePlayerNpsText);
 
                         // top time
                         andreTopTimeBox = new FlxSprite(0, 20).makeGraphic(10, 10, FlxColor.BLACK);
                         andreTopTimeBox.alpha = BOX_ALPHA;
-                        andreTopTimeBox.cameras = [camHUD];
+                        andreTopTimeBox.cameras = [camOther];
+                        andreTopTimeBox.scrollFactor.set();
                         add(andreTopTimeBox);
 
                         andreTopTimeText = new FlxText(0, 30, 0, "", TIME_SIZE);
                         andreTopTimeText.setFormat(Paths.font("vcr.ttf"), TIME_SIZE, FlxColor.WHITE, CENTER);
-                        andreTopTimeText.cameras = [camHUD];
+                        andreTopTimeText.cameras = [camOther];
+                        andreTopTimeText.scrollFactor.set();
                         add(andreTopTimeText);
 
                         // stats bottom
                         andreStatsBox = new FlxSprite(0, FlxG.height - 45).makeGraphic(10, 10, FlxColor.BLACK);
                         andreStatsBox.alpha = BOX_ALPHA;
-                        andreStatsBox.cameras = [camHUD];
+                        andreStatsBox.cameras = [camOther];
+                        andreStatsBox.scrollFactor.set();
                         add(andreStatsBox);
 
                         andreStatsText = new FlxText(0, FlxG.height - 40, FlxG.width, "", TEXT_SIZE);
                         andreStatsText.setFormat(Paths.font("vcr.ttf"), TEXT_SIZE, FlxColor.WHITE, CENTER);
-                        andreStatsText.cameras = [camHUD];
+                        andreStatsText.cameras = [camOther];
+                        andreStatsText.scrollFactor.set();
                         add(andreStatsText);
                 }
         }
@@ -2594,6 +2604,10 @@ class PlayState extends MusicBeatState
                         andreTopTimeText.visible = !isBot;
                         andreStatsBox.visible = !isBot;
                         andreStatsText.visible = !isBot;
+
+                        // Prevent camera beat bounce - force scale 1
+                        var noBounce = [andreCounterBox, andreCounterText, andreOppBox, andreOppNpsText, andrePlayerBox, andrePlayerNpsText, andreTopTimeBox, andreTopTimeText, andreStatsBox, andreStatsText];
+                        for (obj in noBounce) if (obj != null) obj.scale.set(1, 1);
 
                         if (isBot) {
                                 // 0 + 0 = 0 format - THIS IS YOUR COMBO
