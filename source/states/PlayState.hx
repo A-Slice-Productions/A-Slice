@@ -2651,23 +2651,12 @@ class PlayState extends MusicBeatState
                                 // 0 + 0 = 0 format - THIS IS YOUR COMBO
                                 var total = andreOppNotes + andrePlayerNotes;
                                 if (ClientPrefs.data.ghostDensity) {
-                                        // Count real notes by song position, not hits
-                                        var curPos = Conductor.songPosition;
-                                        // binary search for speed with 1M notes
-                                        var low = 0;
-                                        var high = andreNoteTimes.length - 1;
-                                        var mid = 0;
-                                        var count = 0;
-                                        while (low <= high) {
-                                                mid = (low + high) >> 1;
-                                                if (andreNoteTimes[mid] <= curPos) {
-                                                        count = mid + 1;
-                                                        low = mid + 1;
-                                                } else {
-                                                        high = mid - 1;
-                                                }
-                                        }
-                                        andreCounterText.text = andreFormat(count) + " / " + andreFormat(andreActualTotalNotes);
+                                        // Show 0 + 0 = 0 | total
+                                        var totalHits = andreOppNotes + andrePlayerNotes;
+                                        // Also make FPS affected - force update every frame
+                                        // (no skip, so FPS reflects real load)
+                                        FlxG.updateFramerate = 1000; // ensure full update
+                                        andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(totalHits) + " | " + andreFormat(andreActualTotalNotes);
                                 } else {
                                         andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(total);
                                 }
