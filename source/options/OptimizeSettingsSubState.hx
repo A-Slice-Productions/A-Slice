@@ -167,6 +167,12 @@ class OptimizeSettingsSubState extends BaseOptionsMenu
                         BOOL);
                 addOption(option);
 
+        var option:Option = new Option('Ghost Density',
+                        "If checked, merges overlapped notes and counts density.\nUsed by Andre HUD for real note counter.",
+                        'ghostDensity',
+                        BOOL);
+                addOption(option);
+
         var option:Option = new Option('Use AndreJr HUD (Haxe)',
                         "If checked, uses built-in AndreJr HUD instead of Lua.\nNo Lua script needed, runs inside PlayState.",
                         'useAndreHUD',
