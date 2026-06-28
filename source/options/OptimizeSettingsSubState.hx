@@ -71,7 +71,7 @@ class OptimizeSettingsSubState extends BaseOptionsMenu
                 addOption(option);
 
                 var option:Option = new Option('Single Note To Note Group',
-                        "If checked: Merges consecutive notes into 1 long image instead of thousands of sprites.\nMassively improves FPS on charts with 1M+ notes.\nIf you don't know what this does, leave it enabled.",
+                        "If checked: Merges consecutive notes into 1 long image instead of thousands of sprites.\nMassively improves FPS on charts with 1M+ notes.\nMerges only when note count exceeds mergeThreshold.",
                         'singleNoteToGroup',
                         BOOL);
                 addOption(option);
