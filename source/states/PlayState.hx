@@ -1091,12 +1091,10 @@ class PlayState extends MusicBeatState
                 if (andreHUDEnabled) {
                         // Hide default UI
                         if (healthBar != null) healthBar.visible = false;
-                        if (healthBarBG != null) healthBarBG.visible = false;
                         if (iconP1 != null) iconP1.visible = false;
                         if (iconP2 != null) iconP2.visible = false;
                         if (scoreTxt != null) scoreTxt.visible = false;
                         if (timeBar != null) timeBar.visible = false;
-                        if (timeBarBG != null) timeBarBG.visible = false;
                         if (timeTxt != null) timeTxt.visible = false;
                         if (botplayTxt != null) botplayTxt.visible = false;
 
