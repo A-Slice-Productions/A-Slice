@@ -219,6 +219,7 @@ class PlayState extends MusicBeatState
         public var andreMaxOppNPS:Int = 0;
         public var andreActualTotalNotes:Int = 0;
         public var andreVisibleTotalNotes:Int = 0;
+        public var andreNoteTimes:Array<Float> = [];
         // Format numbers with commas: 1000 -> 1,000
         function andreFormat(num:Float):String {
                 var n = Math.floor(num);
@@ -1110,13 +1111,19 @@ class PlayState extends MusicBeatState
                 andreHUDEnabled = ClientPrefs.data.useAndreHUD;
                 // Calculate actual total notes for density display
                 andreActualTotalNotes = 0;
+                andreNoteTimes = [];
                 if (SONG != null && SONG.notes != null) {
                         for (section in SONG.notes) {
                                 if (section != null && section.sectionNotes != null) {
-                                        andreActualTotalNotes += section.sectionNotes.length;
+                                        for (noteData in section.sectionNotes) {
+                                                andreActualTotalNotes++;
+                                                andreNoteTimes.push(noteData[0]); // strumTime
+                                        }
                                 }
                         }
                 }
+                // sort just in case
+                andreNoteTimes.sort(function(a,b) return a < b ? -1 : 1);
                 if (andreHUDEnabled) {
                         // Hide default UI
                         if (healthBar != null) healthBar.visible = false;
@@ -2644,12 +2651,23 @@ class PlayState extends MusicBeatState
                                 // 0 + 0 = 0 format - THIS IS YOUR COMBO
                                 var total = andreOppNotes + andrePlayerNotes;
                                 if (ClientPrefs.data.ghostDensity) {
-                                        // Show actual note count instead of removed version
-                                        var total = andreOppNotes + andrePlayerNotes;
-                                        var progress = total / andreVisibleTotalNotes;
-                                        if (progress > 1) progress = 1;
-                                        var currentActual = Math.floor(progress * andreActualTotalNotes);
-                                        andreCounterText.text = andreFormat(currentActual) + " / " + andreFormat(andreActualTotalNotes);
+                                        // Count real notes by song position, not hits
+                                        var curPos = Conductor.songPosition;
+                                        // binary search for speed with 1M notes
+                                        var low = 0;
+                                        var high = andreNoteTimes.length - 1;
+                                        var mid = 0;
+                                        var count = 0;
+                                        while (low <= high) {
+                                                mid = (low + high) >> 1;
+                                                if (andreNoteTimes[mid] <= curPos) {
+                                                        count = mid + 1;
+                                                        low = mid + 1;
+                                                } else {
+                                                        high = mid - 1;
+                                                }
+                                        }
+                                        andreCounterText.text = andreFormat(count) + " / " + andreFormat(andreActualTotalNotes);
                                 } else {
                                         andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(total);
                                 }
