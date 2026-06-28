@@ -220,6 +220,8 @@ class PlayState extends MusicBeatState
         public var andreActualTotalNotes:Int = 0;
         public var andreVisibleTotalNotes:Int = 0;
         public var andreNoteTimes:Array<Float> = [];
+        public var andreOppTimes:Array<Float> = [];
+        public var andrePlayerTimes:Array<Float> = [];
         // Format numbers with commas: 1000 -> 1,000
         function andreFormat(num:Float):String {
                 var n = Math.floor(num);
@@ -1112,18 +1114,30 @@ class PlayState extends MusicBeatState
                 // Calculate actual total notes for density display
                 andreActualTotalNotes = 0;
                 andreNoteTimes = [];
+                andreOppTimes = [];
+                andrePlayerTimes = [];
                 if (SONG != null && SONG.notes != null) {
                         for (section in SONG.notes) {
                                 if (section != null && section.sectionNotes != null) {
+                                        var mustHit = section.mustHitSection;
                                         for (noteData in section.sectionNotes) {
                                                 andreActualTotalNotes++;
-                                                andreNoteTimes.push(noteData[0]); // strumTime
+                                                var t = noteData[0];
+                                                var type = noteData[1];
+                                                andreNoteTimes.push(t);
+                                                // determine side
+                                                var isPlayer = mustHit;
+                                                if (type > 3) isPlayer = !mustHit; // handle
+                                                if (isPlayer) andrePlayerTimes.push(t);
+                                                else andreOppTimes.push(t);
                                         }
                                 }
                         }
                 }
                 // sort just in case
                 andreNoteTimes.sort(function(a,b) return a < b ? -1 : 1);
+                andreOppTimes.sort(function(a,b) return a < b ? -1 : 1);
+                andrePlayerTimes.sort(function(a,b) return a < b ? -1 : 1);
                 if (andreHUDEnabled) {
                         // Hide default UI
                         if (healthBar != null) healthBar.visible = false;
@@ -2651,12 +2665,36 @@ class PlayState extends MusicBeatState
                                 // 0 + 0 = 0 format - THIS IS YOUR COMBO
                                 var total = andreOppNotes + andrePlayerNotes;
                                 if (ClientPrefs.data.ghostDensity) {
-                                        // Show 0 + 0 = 0 | total
-                                        var totalHits = andreOppNotes + andrePlayerNotes;
-                                        // Also make FPS affected - force update every frame
-                                        // (no skip, so FPS reflects real load)
-                                        FlxG.updateFramerate = 1000; // ensure full update
-                                        andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(totalHits) + " | " + andreFormat(andreActualTotalNotes);
+                                        // Show current note count instead of removed version
+                                        var curPos = Conductor.songPosition;
+                                        // binary search opp
+                                        var lo = 0; var hi = andreOppTimes.length - 1; var oppCount = 0;
+                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andreOppTimes[m] <= curPos) { oppCount = m + 1; lo = m + 1; } else hi = m - 1; }
+                                        lo = 0; hi = andrePlayerTimes.length - 1; var playerCount = 0;
+                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] <= curPos) { playerCount = m + 1; lo = m + 1; } else hi = m - 1; }
+                                        var totalCount = oppCount + playerCount;
+                                        
+                                        // NPS based on actual notes, not hits
+                                        var window = 1000;
+                                        var start = curPos - window;
+                                        // opp NPS
+                                        lo = 0; hi = andreOppTimes.length - 1; var oppStart = 0;
+                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andreOppTimes[m] < start) { oppStart = m + 1; lo = m + 1; } else hi = m - 1; }
+                                        var oppNPS = oppCount - oppStart;
+                                        // player NPS
+                                        lo = 0; hi = andrePlayerTimes.length - 1; var playerStart = 0;
+                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] < start) { playerStart = m + 1; lo = m + 1; } else hi = m - 1; }
+                                        var playerNPS = playerCount - playerStart;
+                                        
+                                        // update NPS displays
+                                        andreOppNpsText.text = andreFormat(oppNPS) + " | " + andreFormat(andreMaxOppNPS);
+                                        andrePlayerNpsText.text = andreFormat(playerNPS) + " | " + andreFormat(andreMaxPlayerNPS);
+                                        if (oppNPS > andreMaxOppNPS) andreMaxOppNPS = oppNPS;
+                                        if (playerNPS > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNPS;
+                                        
+                                        // make FPS affected
+                                        FlxG.updateFramerate = 1000;
+                                        andreCounterText.text = andreFormat(oppCount) + " + " + andreFormat(playerCount) + " = " + andreFormat(totalCount) + " | " + andreFormat(andreActualTotalNotes);
                                 } else {
                                         andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(total);
                                 }
