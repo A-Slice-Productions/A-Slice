@@ -8,6 +8,7 @@ import flixel.animation.FlxAnimation;
 #if desktop import backend.FFMpeg; #end
 import openfl.system.Capabilities;
 import objects.Note.CastNote;
+import objects.NoteGroup;
 import objects.Note.SpamNoteData;
 import flixel.math.FlxRandom;
 import haxe.ds.IntMap;
