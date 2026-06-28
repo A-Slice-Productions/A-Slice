@@ -1123,12 +1123,9 @@ class PlayState extends MusicBeatState
                                         for (noteData in section.sectionNotes) {
                                                 andreActualTotalNotes++;
                                                 var t = noteData[0];
-                                                var type = noteData[1];
                                                 andreNoteTimes.push(t);
-                                                // determine side
-                                                var isPlayer = mustHit;
-                                                if (type > 3) isPlayer = !mustHit; // handle
-                                                if (isPlayer) andrePlayerTimes.push(t);
+                                                // simple side detection
+                                                if (mustHit) andrePlayerTimes.push(t);
                                                 else andreOppTimes.push(t);
                                         }
                                 }
@@ -2686,13 +2683,7 @@ class PlayState extends MusicBeatState
                                         while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] < start) { playerStart = m + 1; lo = m + 1; } else hi = m - 1; }
                                         var playerNPS = playerCount - playerStart;
                                         
-                                        // include ghost note density
-                                        var densityFactor = 1.0;
-                                        if (andreVisibleTotalNotes > 0) {
-                                                densityFactor = andreActualTotalNotes / andreVisibleTotalNotes;
-                                        }
-                                        oppNPS = Math.floor(oppNPS * densityFactor);
-                                        playerNPS = Math.floor(playerNPS * densityFactor);
+                                        // no density multiplier - already counting real notes
                                         
                                         // update NPS displays
                                         andreOppNpsText.text = andreFormat(oppNPS) + " | " + andreFormat(andreMaxOppNPS);
