@@ -222,6 +222,7 @@ class PlayState extends MusicBeatState
         public var andreNoteTimes:Array<Float> = [];
         public var andreOppTimes:Array<Float> = [];
         public var andrePlayerTimes:Array<Float> = [];
+        public var andreNpsHistory:Array<{t:Float, o:Int, p:Int}> = [];
         // Format numbers with commas: 1000 -> 1,000
         function andreFormat(num:Float):String {
                 var n = Math.floor(num);
@@ -2671,8 +2672,21 @@ class PlayState extends MusicBeatState
                                         while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] <= curPos) { playerCount = m + 1; lo = m + 1; } else hi = m - 1; }
                                         var totalCount = oppCount + playerCount;
                                         
-                                        // let original NPS (based on visible hits) run normally - don't override
-                                        // this keeps NPS at ~2,069 instead of jumping to 200k
+                                        // NPS = combo increase per second (not raw notes)
+                                        var now = Conductor.songPosition;
+                                        andreNpsHistory.push({t: now, o: andreOppNotes, p: andrePlayerNotes});
+                                        // remove older than 1 sec
+                                        while (andreNpsHistory.length > 0 && now - andreNpsHistory[0].t > 1000) {
+                                                andreNpsHistory.shift();
+                                        }
+                                        var first = andreNpsHistory[0];
+                                        var oppNpsCombo = andreOppNotes - first.o;
+                                        var playerNpsCombo = andrePlayerNotes - first.p;
+                                        if (oppNpsCombo > andreMaxOppNPS) andreMaxOppNPS = oppNpsCombo;
+                                        if (playerNpsCombo > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNpsCombo;
+                                        
+                                        andreOppNpsText.text = andreFormat(oppNpsCombo) + " | " + andreFormat(andreMaxOppNPS);
+                                        andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
                                         
                                         // make FPS affected
                                         FlxG.updateFramerate = 1000;
