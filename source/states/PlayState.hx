@@ -2680,6 +2680,7 @@ class PlayState extends MusicBeatState
 
                                         andreOppNpsText.text = andreFormat(oppNpsCombo) + " | " + andreFormat(andreMaxOppNPS);
                                         andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
+                                        andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
                                         
                                         // make FPS affected
                                         FlxG.updateFramerate = 1000;
