@@ -217,8 +217,8 @@ class PlayState extends MusicBeatState
         public var andreOppHits:Array<Float> = [];
         public var andreMaxPlayerNPS:Int = 0;
         public var lastComboNpsTime:Float = 0;
-        public var lastPlayerComboForNps:Int = 0;
-        public var lastOppComboForNps:Int = 0;
+        public var lastPlayerCountForNps:Int = 0;
+        public var lastOppCountForNps:Int = 0;
         public var andreMaxOppNPS:Int = 0;
         public var andreActualTotalNotes:Int = 0;
         public var andreVisibleTotalNotes:Int = 0;
@@ -1097,6 +1097,8 @@ class PlayState extends MusicBeatState
                                 FlxG.updateFramerate = 1000;
                                 FlxG.drawFramerate = 1000;
                         }
+                        // Cap catch-up so slow readPixels/ffmpeg I/O cannot advance multiple frames per tick.
+                        FlxG.maxElapsed = 1.0 / targetFPS;
                         keepNotes = true;
 
                         if (ClientPrefs.data.vsync) FlxG.stage.application.window.vsync = false;
@@ -1666,7 +1668,7 @@ class PlayState extends MusicBeatState
                                                         tick = GO;
                                                 case 4:
                                                         tick = START;
-                                                        FlxG.maxElapsed = nanoPosition || ffmpegMode ? 1000000 : 0.1;
+                                                        FlxG.maxElapsed = nanoPosition ? 1000000 : (ffmpegMode ? (1.0 / targetFPS) : 0.1);
                                         }
 
                                         #if FLX_PITCH if (countVoice != null) countVoice.pitch = playbackRate; #end
@@ -2666,34 +2668,65 @@ class PlayState extends MusicBeatState
                                 // 0 + 0 = 0 format - THIS IS YOUR COMBO
                                 var total = andreOppNotes + andrePlayerNotes;
                                 if (ClientPrefs.data.ghostDensity) {
-                                        // Show current note count instead of removed version
-                                        var curPos = Conductor.songPosition;
-                                        // binary search opp
-                                        var lo = 0; var hi = andreOppTimes.length - 1; var oppCount = 0;
-                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andreOppTimes[m] <= curPos) { oppCount = m + 1; lo = m + 1; } else hi = m - 1; }
-                                        lo = 0; hi = andrePlayerTimes.length - 1; var playerCount = 0;
-                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] <= curPos) { playerCount = m + 1; lo = m + 1; } else hi = m - 1; }
-                                        var totalCount = oppCount + playerCount;
-                                        
-                                        // NPS = direct combo per second (player combo and opponent combo)
-                                        if (Conductor.songPosition - lastComboNpsTime >= 1000) {
-                                                var oppNpsCombo = opCombo - lastOppComboForNps;
-                                                var playerNpsCombo = combo - lastPlayerComboForNps;
-                                                if (oppNpsCombo > andreMaxOppNPS) andreMaxOppNPS = oppNpsCombo;
-                                                if (playerNpsCombo > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNpsCombo;
-                                                andreOppNpsText.text = andreFormat(oppNpsCombo) + " | " + andreFormat(andreMaxOppNPS);
-                                                andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
-                                                lastOppComboForNps = opCombo;
-                                                lastPlayerComboForNps = combo;
-                                                lastComboNpsTime = Conductor.songPosition;
+                                        var lo = 0;
+                                        var hi = andreOppTimes.length - 1;
+                                        var oppCount = 0;
+                                        while (lo <= hi) {
+                                                var m = (lo + hi) >> 1;
+                                                if (andreOppTimes[m] <= curPos) {
+                                                        oppCount = m + 1;
+                                                        lo = m + 1;
+                                                } else hi = m - 1;
                                         }
+
+                                        lo = 0;
+                                        hi = andrePlayerTimes.length - 1;
+                                        var playerCount = 0;
+                                        while (lo <= hi) {
+                                                var m = (lo + hi) >> 1;
+                                                if (andrePlayerTimes[m] <= curPos) {
+                                                        playerCount = m + 1;
+                                                        lo = m + 1;
+                                                } else hi = m - 1;
+                                        }
+
+                                        var totalCount = oppCount + playerCount;
+                                        var now = curPos;
+
+                                        if (oppCount > lastOppCountForNps) {
+                                                var diff = oppCount - lastOppCountForNps;
+                                                for (i in 0...diff)
+                                                        andreNpsHistory.push({t: now, o: lastOppCountForNps + i + 1, p: playerCount});
+                                                lastOppCountForNps = oppCount;
+                                        }
+
+                                        if (playerCount > lastPlayerCountForNps) {
+                                                var diff = playerCount - lastPlayerCountForNps;
+                                                for (i in 0...diff)
+                                                        andreNpsHistory.push({t: now, o: oppCount, p: lastPlayerCountForNps + i + 1});
+                                                lastPlayerCountForNps = playerCount;
+                                        }
+
+                                        while (andreNpsHistory.length > 0 && now - andreNpsHistory[0].t > 1000)
+                                                andreNpsHistory.shift();
+
+                                        var first = andreNpsHistory.length > 0 ? andreNpsHistory[0] : {t: now, o: oppCount, p: playerCount};
+                                        var oppNpsCombo = oppCount - first.o;
+                                        var playerNpsCombo = playerCount - first.p;
+
+                                        if (oppNpsCombo > andreMaxOppNPS) andreMaxOppNPS = oppNpsCombo;
+                                        if (playerNpsCombo > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNpsCombo;
+
+                                        andreOppNpsText.text = andreFormat(oppNpsCombo) + " | " + andreFormat(andreMaxOppNPS);
                                         andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
-                                        
-                                        // make FPS affected
-                                        FlxG.updateFramerate = 1000;
+
+                                        if (!ffmpegMode) FlxG.updateFramerate = 1000;
                                         andreCounterText.text = andreFormat(oppCount) + " + " + andreFormat(playerCount) + " = " + andreFormat(totalCount) + " | " + andreFormat(andreActualTotalNotes);
                                 } else {
-                                        andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(total);
+                                        andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(andreOppNotes + andrePlayerNotes);
+
+                                        andreOppNpsText.text = andreFormat(oppNPS) + " | " + andreFormat(andreMaxOppNPS);
+                                        andrePlayerNpsText.text = andreFormat(playerNPS) + " | " + andreFormat(andreMaxPlayerNPS);
                                 }
                                 andreCounterText.x = (FlxG.width - andreCounterText.width) / 2;
                                 andreCounterBox.setGraphicSize(Std.int(andreCounterText.width + 20), Std.int(andreCounterText.height + 10));
@@ -2701,12 +2734,10 @@ class PlayState extends MusicBeatState
                                 andreCounterBox.x = andreCounterText.x - 10;
                                 andreCounterBox.y = andreCounterText.y - 5;
 
-                                andreOppNpsText.text = andreFormat(oppNPS) + " | " + andreFormat(andreMaxOppNPS);
                                 andreOppBox.setGraphicSize(Std.int(andreOppNpsText.width + 20), Std.int(andreOppNpsText.height + 10));
                                 andreOppBox.updateHitbox();
                                 andreOppBox.y = andreOppNpsText.y - 5;
 
-                                andrePlayerNpsText.text = andreFormat(playerNPS) + " | " + andreFormat(andreMaxPlayerNPS);
                                 andrePlayerNpsText.x = FlxG.width - andrePlayerNpsText.width - 20;
                                 andrePlayerBox.setGraphicSize(Std.int(andrePlayerNpsText.width + 20), Std.int(andrePlayerNpsText.height + 10));
                                 andrePlayerBox.updateHitbox();
@@ -2767,6 +2798,9 @@ class PlayState extends MusicBeatState
                         
                         globalElapsed = elapsedNano * playbackRate;
                         nanoTime = CoolUtil.getNanoTime();
+                } else if (ffmpegMode) {
+                        // Fixed step: output timing must not depend on compositor/frame pacing (Ubuntu GNOME).
+                        globalElapsed = (1.0 / targetFPS) * playbackRate;
                 } else {
                         globalElapsed = FlxG.elapsed * playbackRate;
                 }
@@ -5427,7 +5461,7 @@ class PlayState extends MusicBeatState
         var holdAnim:String;
         function opponentNoteHit(note:Note):Void
         {
-                if (andreHUDEnabled && !note.isSustainNote) { if (ghostDensity) { andreOppNotes += Std.int(Math.max(1, note.density)); } else { andreOppNotes++; } andreOppHits.push(Conductor.songPosition); }
+                if (andreHUDEnabled && !note.isSustainNote) { if (ghostDensity) { andreOppNotes += Std.int(Math.max(1, note.density)); } else { andreOppNotes++; andreOppHits.push(Conductor.songPosition); } }
                 if (note.hitByOpponent) return;
 
                 if (noteHitPreEvent) {
@@ -5527,7 +5561,7 @@ class PlayState extends MusicBeatState
         var hitHealth:Float = 0.02;
         public function goodNoteHit(note:Note):Void
         {
-                if (andreHUDEnabled && !note.isSustainNote) { if (ghostDensity) { andrePlayerNotes += Std.int(Math.max(1, note.density)); } else { andrePlayerNotes++; } andrePlayerHits.push(Conductor.songPosition); } // MOD: count combo density for NPS when ghostDensity
+                if (andreHUDEnabled && !note.isSustainNote) { if (ghostDensity) { andrePlayerNotes += Std.int(Math.max(1, note.density)); } else { andrePlayerNotes++; andrePlayerHits.push(Conductor.songPosition); } }
                 if (note.wasGoodHit || cpuControlled && note.ignoreNote)
                         return;
                 
