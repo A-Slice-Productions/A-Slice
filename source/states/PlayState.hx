@@ -2672,19 +2672,12 @@ class PlayState extends MusicBeatState
                                         while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] <= curPos) { playerCount = m + 1; lo = m + 1; } else hi = m - 1; }
                                         var totalCount = oppCount + playerCount;
                                         
-                                        // NPS = combo increase per second (not raw notes)
-                                        var now = Conductor.songPosition;
-                                        andreNpsHistory.push({t: now, o: andreOppNotes, p: andrePlayerNotes});
-                                        // remove older than 1 sec
-                                        while (andreNpsHistory.length > 0 && now - andreNpsHistory[0].t > 1000) {
-                                                andreNpsHistory.shift();
-                                        }
-                                        var first = andreNpsHistory[0];
-                                        var oppNpsCombo = andreOppNotes - first.o;
-                                        var playerNpsCombo = andrePlayerNotes - first.p;
+                                        // NPS = combo increase per second (fixed to use density-based sideHit)
+                                        var oppNpsCombo = Math.round(opNpsVal);
+                                        var playerNpsCombo = Math.round(bfNpsVal);
                                         if (oppNpsCombo > andreMaxOppNPS) andreMaxOppNPS = oppNpsCombo;
                                         if (playerNpsCombo > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNpsCombo;
-                                        
+
                                         andreOppNpsText.text = andreFormat(oppNpsCombo) + " | " + andreFormat(andreMaxOppNPS);
                                         andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
                                         
