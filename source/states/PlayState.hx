@@ -198,48 +198,32 @@ class PlayState extends MusicBeatState
         public var skipGhostNotes:Bool = ClientPrefs.data.skipGhostNotes;
         public var ghostDensity:Bool = ClientPrefs.data.ghostDensity;
         public var ghostNotesCaught:Int = 0;
-
-        // --- AndreJr HUD (Haxe, no Lua) ---
-        public var andreHUDEnabled:Bool = false;
-        public var andreCounterText:FlxText;
-        public var andreCounterBox:FlxSprite;
-        public var andreOppNpsText:FlxText;
-        public var andreOppBox:FlxSprite;
-        public var andrePlayerNpsText:FlxText;
-        public var andrePlayerBox:FlxSprite;
-        public var andreTopTimeText:FlxText;
-        public var andreTopTimeBox:FlxSprite;
-        public var andreStatsText:FlxText;
-        public var andreStatsBox:FlxSprite;
-        public var andrePlayerNotes:Int = 0;
+        // --- ANDRE HUD ---
         public var andreOppNotes:Int = 0;
-        public var andrePlayerHits:Array<Float> = [];
-        public var andreOppHits:Array<Float> = [];
-        public var andreMaxPlayerNPS:Int = 0;
-        public var andreMaxOppNPS:Int = 0;
+        public var andrePlayerNotes:Int = 0;
         public var andreActualTotalNotes:Int = 0;
         public var andreVisibleTotalNotes:Int = 0;
+        public var andreMaxCombo:Int = 0;
+        public var andreMaxOppNPS:Int = 0;
+        public var andreMaxPlayerNPS:Int = 0;
+        public var andreCounterText:FlxText;
+        public var andreOppNpsText:FlxText;
+        public var andrePlayerNpsText:FlxText;
         public var andreNoteTimes:Array<Float> = [];
         public var andreOppTimes:Array<Float> = [];
         public var andrePlayerTimes:Array<Float> = [];
         public var andreNpsHistory:Array<{t:Float, o:Int, p:Int}> = [];
-        // Format numbers with commas: 1000 -> 1,000
-        function andreFormat(num:Float):String {
-                var n = Math.floor(num);
+        public function andreFormat(n:Int):String {
                 var s = Std.string(n);
-                var len = s.length;
-                var result = "";
-                var count = 0;
-                for (i in 0...len) {
-                        var c = s.charAt(len - 1 - i);
-                        if (count == 3) {
-                                result = "," + result;
-                                count = 0;
-                        }
-                        result = c + result;
-                        count++;
+                var r = "";
+                var c = 0;
+                for (i in 0...s.length) {
+                        var ch = s.charAt(s.length - 1 - i);
+                        if (c > 0 && c % 3 == 0) r = "," + r;
+                        r = ch + r;
+                        c++;
                 }
-                return result;
+                return r;
         }
 
         public var camFollow:FlxObject;
@@ -1108,117 +1092,6 @@ class PlayState extends MusicBeatState
                         MemoryUtil.enable();
                         MemoryUtil.collect(true);
                         MemoryUtil.disable();
-                }
-
-                // --- AndreJr HUD Init ---
-                andreHUDEnabled = ClientPrefs.data.useAndreHUD;
-                // Calculate actual total notes for density display
-                andreActualTotalNotes = 0;
-                andreNoteTimes = [];
-                andreOppTimes = [];
-                andrePlayerTimes = [];
-                if (SONG != null && SONG.notes != null) {
-                        for (section in SONG.notes) {
-                                if (section != null && section.sectionNotes != null) {
-                                        var mustHit = section.mustHitSection;
-                                        for (noteData in section.sectionNotes) {
-                                                andreActualTotalNotes++;
-                                                var t = noteData[0];
-                                                andreNoteTimes.push(t);
-                                                // simple side detection
-                                                if (mustHit) andrePlayerTimes.push(t);
-                                                else andreOppTimes.push(t);
-                                        }
-                                }
-                        }
-                }
-                // sort just in case
-                andreNoteTimes.sort(function(a,b) return a < b ? -1 : 1);
-                andreOppTimes.sort(function(a,b) return a < b ? -1 : 1);
-                andrePlayerTimes.sort(function(a,b) return a < b ? -1 : 1);
-                if (andreHUDEnabled) {
-                        // Hide default UI
-                        if (healthBar != null) healthBar.visible = false;
-                        if (iconP1 != null) iconP1.visible = false;
-                        if (iconP2 != null) iconP2.visible = false;
-                        if (scoreTxt != null) scoreTxt.visible = false;
-                        if (timeBar != null) timeBar.visible = false;
-                        if (timeTxt != null) timeTxt.visible = false;
-                        if (botplayTxt != null) botplayTxt.visible = false;
-
-                        var TEXT_SIZE = 28;
-                        var NPS_SIZE = 22;
-                        var TIME_SIZE = 20;
-                        var PADDING_X = 20;
-                        var PADDING_Y = 10;
-                        var BOX_ALPHA = 0.5;
-
-                        // counter (botplay)
-                        andreCounterBox = new FlxSprite(0, 20).makeGraphic(10, 10, FlxColor.BLACK);
-                        andreCounterBox.alpha = BOX_ALPHA;
-                        andreCounterBox.cameras = [camOther];
-                        andreCounterBox.scrollFactor.set();
-                        add(andreCounterBox);
-
-                        andreCounterText = new FlxText(0, 30, 0, "", TEXT_SIZE);
-                        andreCounterText.setFormat(Paths.font("vcr.ttf"), TEXT_SIZE, FlxColor.WHITE, CENTER);
-                        andreCounterText.cameras = [camOther];
-                        andreCounterText.scrollFactor.set();
-                        add(andreCounterText);
-
-                        // opp NPS left
-                        andreOppBox = new FlxSprite(10, FlxG.height - 45).makeGraphic(10, 10, FlxColor.BLACK);
-                        andreOppBox.alpha = BOX_ALPHA;
-                        andreOppBox.cameras = [camOther];
-                        andreOppBox.scrollFactor.set();
-                        add(andreOppBox);
-
-                        andreOppNpsText = new FlxText(20, FlxG.height - 40, 0, "", NPS_SIZE);
-                        andreOppNpsText.setFormat(Paths.font("vcr.ttf"), NPS_SIZE, FlxColor.WHITE, LEFT);
-                        andreOppNpsText.cameras = [camOther];
-                        andreOppNpsText.scrollFactor.set();
-                        add(andreOppNpsText);
-
-                        // player NPS right
-                        andrePlayerBox = new FlxSprite(0, FlxG.height - 45).makeGraphic(10, 10, FlxColor.BLACK);
-                        andrePlayerBox.alpha = BOX_ALPHA;
-                        andrePlayerBox.cameras = [camOther];
-                        andrePlayerBox.scrollFactor.set();
-                        add(andrePlayerBox);
-
-                        andrePlayerNpsText = new FlxText(0, FlxG.height - 40, 0, "", NPS_SIZE);
-                        andrePlayerNpsText.setFormat(Paths.font("vcr.ttf"), NPS_SIZE, FlxColor.WHITE, RIGHT);
-                        andrePlayerNpsText.cameras = [camOther];
-                        andrePlayerNpsText.scrollFactor.set();
-                        add(andrePlayerNpsText);
-
-                        // top time
-                        andreTopTimeBox = new FlxSprite(0, 20).makeGraphic(10, 10, FlxColor.BLACK);
-                        andreTopTimeBox.alpha = BOX_ALPHA;
-                        andreTopTimeBox.cameras = [camOther];
-                        andreTopTimeBox.scrollFactor.set();
-                        add(andreTopTimeBox);
-
-                        andreTopTimeText = new FlxText(0, 30, 0, "", TIME_SIZE);
-                        andreTopTimeText.setFormat(Paths.font("vcr.ttf"), TIME_SIZE, FlxColor.WHITE, CENTER);
-                        andreTopTimeText.cameras = [camOther];
-                        andreTopTimeText.scrollFactor.set();
-                        add(andreTopTimeText);
-
-                        // stats bottom
-                        andreStatsBox = new FlxSprite(0, FlxG.height - 45).makeGraphic(10, 10, FlxColor.BLACK);
-                        andreStatsBox.alpha = BOX_ALPHA;
-                        andreStatsBox.cameras = [camOther];
-                        andreStatsBox.scrollFactor.set();
-                        add(andreStatsBox);
-
-                        andreStatsText = new FlxText(0, FlxG.height - 40, FlxG.width, "", TEXT_SIZE);
-                        andreStatsText.setFormat(Paths.font("vcr.ttf"), TEXT_SIZE, FlxColor.WHITE, CENTER);
-                        andreStatsText.cameras = [camOther];
-                        andreStatsText.scrollFactor.set();
-                        add(andreStatsText);
-                        andreVisibleTotalNotes = andreActualTotalNotes - ghostNotesCaught;
-                        if (andreVisibleTotalNotes < 1) andreVisibleTotalNotes = 1;
                 }
         }
 
@@ -2629,116 +2502,6 @@ class PlayState extends MusicBeatState
 
         override public function update(elapsed:Float)
         {
-
-                // --- AndreJr HUD Update ---
-                if (andreHUDEnabled) {
-                        var curPos = Conductor.songPosition;
-                        var isBot = cpuControlled;
-
-                        // NPS calc
-                        while (andrePlayerHits.length > 0 && curPos - andrePlayerHits[0] > 1000) andrePlayerHits.shift();
-                        while (andreOppHits.length > 0 && curPos - andreOppHits[0] > 1000) andreOppHits.shift();
-                        var playerNPS = andrePlayerHits.length;
-                        var oppNPS = andreOppHits.length;
-                        andreMaxPlayerNPS = Std.int(Math.max(andreMaxPlayerNPS, playerNPS));
-                        andreMaxOppNPS = Std.int(Math.max(andreMaxOppNPS, oppNPS));
-
-                        // visibility
-                        andreCounterBox.visible = isBot;
-                        andreCounterText.visible = isBot;
-                        andreOppBox.visible = isBot;
-                        andreOppNpsText.visible = isBot;
-                        andrePlayerBox.visible = isBot;
-                        andrePlayerNpsText.visible = isBot;
-                        andreTopTimeBox.visible = !isBot;
-                        andreTopTimeText.visible = !isBot;
-                        andreStatsBox.visible = !isBot;
-                        andreStatsText.visible = !isBot;
-
-                        // Prevent camera beat bounce - force scale 1
-                        var noBounce = [andreCounterBox, andreCounterText, andreOppBox, andreOppNpsText, andrePlayerBox, andrePlayerNpsText, andreTopTimeBox, andreTopTimeText, andreStatsBox, andreStatsText];
-                        for (obj in noBounce) if (obj != null) obj.scale.set(1, 1);
-
-                        if (isBot) {
-                                // 0 + 0 = 0 format - THIS IS YOUR COMBO
-                                var total = andreOppNotes + andrePlayerNotes;
-                                if (ClientPrefs.data.ghostDensity) {
-                                        // Show current note count instead of removed version
-                                        var curPos = Conductor.songPosition;
-                                        // binary search opp
-                                        var lo = 0; var hi = andreOppTimes.length - 1; var oppCount = 0;
-                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andreOppTimes[m] <= curPos) { oppCount = m + 1; lo = m + 1; } else hi = m - 1; }
-                                        lo = 0; hi = andrePlayerTimes.length - 1; var playerCount = 0;
-                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] <= curPos) { playerCount = m + 1; lo = m + 1; } else hi = m - 1; }
-                                        var totalCount = oppCount + playerCount;
-                                        
-                                        // NPS = combo increase per second (not raw notes)
-                                        var now = Conductor.songPosition;
-                                        andreNpsHistory.push({t: now, o: andreOppNotes, p: andrePlayerNotes});
-                                        // remove older than 1 sec
-                                        while (andreNpsHistory.length > 0 && now - andreNpsHistory[0].t > 1000) {
-                                                andreNpsHistory.shift();
-                                        }
-                                        var first = andreNpsHistory[0];
-                                        var oppNpsCombo = andreOppNotes - first.o;
-                                        var playerNpsCombo = andrePlayerNotes - first.p;
-                                        if (oppNpsCombo > andreMaxOppNPS) andreMaxOppNPS = oppNpsCombo;
-                                        if (playerNpsCombo > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNpsCombo;
-                                        
-                                        andreOppNpsText.text = andreFormat(oppNpsCombo) + " | " + andreFormat(andreMaxOppNPS);
-                                        andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
-                                        
-                                        // make FPS affected
-                                        FlxG.updateFramerate = 1000;
-                                        andreCounterText.text = andreFormat(oppCount) + " + " + andreFormat(playerCount) + " = " + andreFormat(totalCount) + " | " + andreFormat(andreActualTotalNotes);
-                                } else {
-                                        andreCounterText.text = andreFormat(andreOppNotes) + " + " + andreFormat(andrePlayerNotes) + " = " + andreFormat(total);
-                                }
-                                andreCounterText.x = (FlxG.width - andreCounterText.width) / 2;
-                                andreCounterBox.setGraphicSize(Std.int(andreCounterText.width + 20), Std.int(andreCounterText.height + 10));
-                                andreCounterBox.updateHitbox();
-                                andreCounterBox.x = andreCounterText.x - 10;
-                                andreCounterBox.y = andreCounterText.y - 5;
-
-                                andreOppNpsText.text = andreFormat(oppNPS) + " | " + andreFormat(andreMaxOppNPS);
-                                andreOppBox.setGraphicSize(Std.int(andreOppNpsText.width + 20), Std.int(andreOppNpsText.height + 10));
-                                andreOppBox.updateHitbox();
-                                andreOppBox.y = andreOppNpsText.y - 5;
-
-                                andrePlayerNpsText.text = andreFormat(playerNPS) + " | " + andreFormat(andreMaxPlayerNPS);
-                                andrePlayerNpsText.x = FlxG.width - andrePlayerNpsText.width - 20;
-                                andrePlayerBox.setGraphicSize(Std.int(andrePlayerNpsText.width + 20), Std.int(andrePlayerNpsText.height + 10));
-                                andrePlayerBox.updateHitbox();
-                                andrePlayerBox.x = andrePlayerNpsText.x - 10;
-                                andrePlayerBox.y = andrePlayerNpsText.y - 5;
-                        } else {
-                                // Player HUD - time and stats
-                                var timeLeft = FlxG.sound.music.length - curPos;
-                                if (timeLeft < 0) timeLeft = 0;
-                                function fmt(ms:Float) {
-                                        var s = Math.floor(ms / 1000);
-                                        var m = Math.floor(s / 60);
-                                        var sec = s % 60;
-                                        var mil = Math.floor((ms % 1000) / 10);
-                                        return (m < 10 ? "0"+m : ""+m) + ":" + (sec < 10 ? "0"+sec : ""+sec) + "." + (mil < 10 ? "0"+mil : ""+mil);
-                                }
-                                andreTopTimeText.text = fmt(timeLeft) + " | " + fmt(curPos);
-                                andreTopTimeText.x = (FlxG.width - andreTopTimeText.width) / 2;
-                                andreTopTimeBox.setGraphicSize(Std.int(andreTopTimeText.width + 20), Std.int(andreTopTimeText.height + 10));
-                                andreTopTimeBox.updateHitbox();
-                                andreTopTimeBox.x = andreTopTimeText.x - 10;
-                                andreTopTimeBox.y = andreTopTimeText.y - 5;
-
-                                var acc = Math.floor(ratingPercent * 100);
-                                var hp = Math.floor(health * 50);
-                                andreStatsText.text = "Score: " + andreFormat(songScore) + " | Misses: " + andreFormat(songMisses) + " | Accuracy: " + acc + "% | Health: " + hp + "%";
-                                andreStatsText.screenCenter(X);
-                                andreStatsBox.setGraphicSize(Std.int(andreStatsText.width + 20), Std.int(andreStatsText.height + 10));
-                                andreStatsBox.updateHitbox();
-                                andreStatsBox.x = andreStatsText.x - 10;
-                                andreStatsBox.y = andreStatsText.y - 5;
-                        }
-                }
                 // Pre Render Image
                 if (preshot) renderFrame();
 
@@ -5426,7 +5189,6 @@ class PlayState extends MusicBeatState
         var holdAnim:String;
         function opponentNoteHit(note:Note):Void
         {
-                if (andreHUDEnabled && !note.isSustainNote) { andreOppNotes++; andreOppHits.push(Conductor.songPosition); }
                 if (note.hitByOpponent) return;
 
                 if (noteHitPreEvent) {
@@ -5526,7 +5288,6 @@ class PlayState extends MusicBeatState
         var hitHealth:Float = 0.02;
         public function goodNoteHit(note:Note):Void
         {
-                if (andreHUDEnabled && !note.isSustainNote) { andrePlayerNotes++; andrePlayerHits.push(Conductor.songPosition); }
                 if (note.wasGoodHit || cpuControlled && note.ignoreNote)
                         return;
                 
