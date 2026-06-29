@@ -216,6 +216,9 @@ class PlayState extends MusicBeatState
         public var andrePlayerHits:Array<Float> = [];
         public var andreOppHits:Array<Float> = [];
         public var andreMaxPlayerNPS:Int = 0;
+        public var lastComboNpsTime:Float = 0;
+        public var lastPlayerComboForNps:Int = 0;
+        public var lastOppComboForNps:Int = 0;
         public var andreMaxOppNPS:Int = 0;
         public var andreActualTotalNotes:Int = 0;
         public var andreVisibleTotalNotes:Int = 0;
@@ -2672,14 +2675,18 @@ class PlayState extends MusicBeatState
                                         while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] <= curPos) { playerCount = m + 1; lo = m + 1; } else hi = m - 1; }
                                         var totalCount = oppCount + playerCount;
                                         
-                                        // NPS = combo increase per second (fixed to use density-based sideHit)
-                                        var oppNpsCombo = Math.round(opNpsVal);
-                                        var playerNpsCombo = Math.round(bfNpsVal);
-                                        if (oppNpsCombo > andreMaxOppNPS) andreMaxOppNPS = oppNpsCombo;
-                                        if (playerNpsCombo > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNpsCombo;
-
-                                        andreOppNpsText.text = andreFormat(oppNpsCombo) + " | " + andreFormat(andreMaxOppNPS);
-                                        andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
+                                        // NPS = direct combo per second (player combo and opponent combo)
+                                        if (Conductor.songPosition - lastComboNpsTime >= 1000) {
+                                                var oppNpsCombo = opCombo - lastOppComboForNps;
+                                                var playerNpsCombo = combo - lastPlayerComboForNps;
+                                                if (oppNpsCombo > andreMaxOppNPS) andreMaxOppNPS = oppNpsCombo;
+                                                if (playerNpsCombo > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNpsCombo;
+                                                andreOppNpsText.text = andreFormat(oppNpsCombo) + " | " + andreFormat(andreMaxOppNPS);
+                                                andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
+                                                lastOppComboForNps = opCombo;
+                                                lastPlayerComboForNps = combo;
+                                                lastComboNpsTime = Conductor.songPosition;
+                                        }
                                         andrePlayerNpsText.text = andreFormat(playerNpsCombo) + " | " + andreFormat(andreMaxPlayerNPS);
                                         
                                         // make FPS affected
