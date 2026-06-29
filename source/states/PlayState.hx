@@ -2671,25 +2671,8 @@ class PlayState extends MusicBeatState
                                         while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] <= curPos) { playerCount = m + 1; lo = m + 1; } else hi = m - 1; }
                                         var totalCount = oppCount + playerCount;
                                         
-                                        // NPS based on actual notes, not hits
-                                        var window = 1000;
-                                        var start = curPos - window;
-                                        // opp NPS
-                                        lo = 0; hi = andreOppTimes.length - 1; var oppStart = 0;
-                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andreOppTimes[m] < start) { oppStart = m + 1; lo = m + 1; } else hi = m - 1; }
-                                        var oppNPS = oppCount - oppStart;
-                                        // player NPS
-                                        lo = 0; hi = andrePlayerTimes.length - 1; var playerStart = 0;
-                                        while (lo <= hi) { var m = (lo + hi) >> 1; if (andrePlayerTimes[m] < start) { playerStart = m + 1; lo = m + 1; } else hi = m - 1; }
-                                        var playerNPS = playerCount - playerStart;
-                                        
-                                        // no density multiplier - already counting real notes
-                                        
-                                        // update NPS displays
-                                        andreOppNpsText.text = andreFormat(oppNPS) + " | " + andreFormat(andreMaxOppNPS);
-                                        andrePlayerNpsText.text = andreFormat(playerNPS) + " | " + andreFormat(andreMaxPlayerNPS);
-                                        if (oppNPS > andreMaxOppNPS) andreMaxOppNPS = oppNPS;
-                                        if (playerNPS > andreMaxPlayerNPS) andreMaxPlayerNPS = playerNPS;
+                                        // let original NPS (based on visible hits) run normally - don't override
+                                        // this keeps NPS at ~2,069 instead of jumping to 200k
                                         
                                         // make FPS affected
                                         FlxG.updateFramerate = 1000;
