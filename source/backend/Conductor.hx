@@ -2,6 +2,7 @@ package backend;
 
 import objects.SustainSplash;
 import backend.Song;
+import backend.ChartTypes;
 import objects.Note;
 
 typedef BPMChangeEvent =

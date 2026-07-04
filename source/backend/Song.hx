@@ -5,6 +5,10 @@ import haxe.Json;
 import backend.SongJson;
 import lime.utils.Assets;
 
+#if (NATIVE_LOOKUP || sys)
+import mikolka.funkin.custom.NativeFileSystem;
+#end
+
 import objects.Note;
 
 using StringTools;
@@ -153,14 +157,27 @@ class Song
 		var formattedFolder:String = Paths.formatToSongPath(folder);
 		var formattedSong:String = Paths.formatToSongPath(jsonInput);
 		_lastPath = Paths.json('$formattedFolder/$formattedSong');
-
-		if(NativeFileSystem.exists(_lastPath))
+		
+		trace('Looking for chart at: $_lastPath');
+		
+		if(NativeFileSystem.exists(_lastPath)) {
 			rawData = NativeFileSystem.getContent(_lastPath);
+			trace('Found chart, rawData length: ${rawData != null ? rawData.length : "null"}');
+		} else {
+			trace('Chart file not found at: $_lastPath');
+		}
 
-		if(rawData == null) return null;
+		if(rawData == null) {
+			trace('Failed to load chart data');
+			return null;
+		}
 
 		// Parse the base JSON file first (e.g., example.json)
 		var baseSong:SwagSong = parseJSON(rawData, jsonInput);
+		if(baseSong == null) {
+			trace('Failed to parse chart JSON');
+			return null;
+		}
 
 		// Loop to find and merge split parts automatically
 		var partNum:Int = 2;

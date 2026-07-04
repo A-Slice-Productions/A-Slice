@@ -3,7 +3,8 @@ package mikolka.vslice.freeplay.pslice;
 import haxe.ds.StringMap;
 import haxe.ds.IntMap;
 import haxe.ds.Map;
-import backend.Song.SwagSong;
+import backend.Song;
+import backend.ChartTypes;
 import backend.SongJson;
 
 //? no psych. uses sys

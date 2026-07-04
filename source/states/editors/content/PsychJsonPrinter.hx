@@ -1,6 +1,7 @@
 package states.editors.content;
 
 import haxe.format.JsonPrinter;
+import backend.Song;
 
  /**
   *  Used to print V-Slice charts and other things with a bit less characters
@@ -111,6 +112,10 @@ class PsychJsonPrinter extends JsonPrinter
 	override function write(k:Dynamic, v:Dynamic) {
 		if (replacer != null)
 			v = replacer(k, v);
+		if (isSwagNote(v)) {
+			writeSwagNote(v);
+			return;
+		}
 		switch (Type.typeof(v)) {
 			case TUnknown:
 				add('"???"');
@@ -196,5 +201,19 @@ class PsychJsonPrinter extends JsonPrinter
 			case TNull:
 				add('null');
 		}
+	}
+
+	function isSwagNote(v:Dynamic):Bool {
+		if (v == null) return false;
+		return Reflect.hasField(v, 'strumTime') 
+			&& Reflect.hasField(v, 'noteData') 
+			&& Reflect.hasField(v, 'sustainLength')
+			&& !Reflect.hasField(v, 'sectionNotes');
+	}
+
+	function writeSwagNote(v:Dynamic):Void {
+		var arr:Array<Dynamic> = [Reflect.field(v, 'strumTime'), Reflect.field(v, 'noteData'), Reflect.field(v, 'sustainLength'), Reflect.field(v, 'noteType')];
+		if (Reflect.hasField(v, 'cmpSpam')) arr.push(Reflect.field(v, 'cmpSpam'));
+		write(0, arr);
 	}
 }

@@ -5,6 +5,7 @@ import hrk.Eseq;
 import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
+import backend.ChartTypes;
 
 import openfl.Lib;
 import openfl.utils.Assets;
