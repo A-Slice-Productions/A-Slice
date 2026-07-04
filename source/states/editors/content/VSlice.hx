@@ -1,7 +1,6 @@
 package states.editors.content;
 
 import backend.Song;
-import backend.ChartTypes;
 import backend.Difficulty;
 
 import flixel.math.FlxMath;
@@ -240,8 +239,8 @@ class VSlice
 				while(noteSec + 1 < sectionTimes.length && sectionTimes[noteSec + 1] <= note.t)
 					noteSec++;
 
-				var psychNote:Dynamic = { strumTime: note.t, noteData: note.d, sustainLength: (note.l != null ? note.l : 0), noteType: null };
-				if(note.k != null && note.k.length > 0 && note.k != 'normal') psychNote.noteType = note.k;
+				var psychNote:Array<Dynamic> = [note.t, note.d, (note.l != null ? note.l : 0)];
+				if(note.k != null && note.k.length > 0 && note.k != 'normal') psychNote.push(note.k);
 
 				if(sectionData[noteSec] != null)
 					sectionData[noteSec].sectionNotes.push(psychNote);
@@ -346,11 +345,11 @@ class VSlice
 				{
 					for (note in section.sectionNotes)
 					{
-					var vsliceNote:VSliceNote = {t: note.strumTime, d: note.noteData};
-					if(note.sustainLength > 0)
-						vsliceNote.l = note.sustainLength;
-					if(note.noteType != null && note.noteType.length > 0)
-						vsliceNote.k = note.noteType;
+						var vsliceNote:VSliceNote = {t: note[0], d: note[1]};
+						if(note[2] > 0)
+							vsliceNote.l = note[2];
+						if(note[3] != null && note[3].length > 0)
+							vsliceNote.k = note[3];
 						
 						notes.push(vsliceNote);
 					}

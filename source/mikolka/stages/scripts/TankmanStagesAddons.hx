@@ -5,10 +5,9 @@ import mikolka.stages.objects.TankmenBG;
 #if !LEGACY_PSYCH
 import substates.GameOverSubstate;
 import backend.Song;
-import backend.ChartTypes;
 import objects.Character;
 #else
-import backend.ChartTypes;
+import Song.SwagSong;
 #end
 
 class TankmanStagesAddons extends BaseStage {

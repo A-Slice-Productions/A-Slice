@@ -3,7 +3,6 @@ package backend;
 import openfl.utils.Assets;
 import haxe.Json;
 import backend.Song;
-import backend.ChartTypes;
 import psychlua.ModchartSprite;
 
 typedef StageFile = {
@@ -65,7 +64,7 @@ class StageData {
 	public static var forceNextDirectory:String = null;
 	public static function loadDirectory(SONG:SwagSong) {
 		var stage:String = '';
-		if(SONG != null && Reflect.hasField(SONG, "stage") && SONG.stage != null && SONG.stage.length > 0)
+		if(Reflect.hasField(SONG, "stage") && SONG.stage != null || SONG.stage.length > 0)
 			stage = SONG.stage;
 		else if(Song.loadedSongName != null)
 			stage = vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));

@@ -8,13 +8,13 @@ class MetaNote extends Note
 {
 	public static var noteTypeTexts:Map<Int, FlxText> = [];
 	public var isEvent:Bool = false;
-	public var songData:Dynamic;
+	public var songData:Array<Dynamic>;
 	public var sustainSprite:FlxSprite;
 	public var chartY:Float = 0;
 	public var chartNoteData:Int = 0;
 
 	var tempCast:CastNote = null;
-	public function new(time:Float, data:Int, songData:Dynamic)
+	public function new(time:Float, data:Int, songData:Array<Dynamic>)
 	{
 		super();
 
@@ -34,43 +34,10 @@ class MetaNote extends Note
 		this.chartNoteData = data;
 	}
 
-	function isStruct(v:Dynamic):Bool {
-		return v != null && Reflect.hasField(v, 'strumTime');
-	}
-
-	function setField(index:Int, value:Dynamic):Void {
-		if (isStruct(songData)) {
-			switch (index) {
-				case 0: songData.strumTime = value;
-				case 1: songData.noteData = value;
-				case 2: songData.sustainLength = value;
-				case 3: songData.noteType = value;
-				case 4: songData.cmpSpam = value;
-				default: Reflect.setField(songData, 'field$index', value);
-			}
-		} else {
-			songData[index] = value;
-		}
-	}
-
-	function getField(index:Int):Dynamic {
-		if (isStruct(songData)) {
-			switch (index) {
-				case 0: return songData.strumTime;
-				case 1: return songData.noteData;
-				case 2: return songData.sustainLength;
-				case 3: return songData.noteType;
-				case 4: return songData.cmpSpam;
-				default: return null;
-			}
-		}
-		return songData[index];
-	}
-
 	public function changeNoteData(v:Int)
 	{
 		this.chartNoteData = v; //despite being so arbitrary its sadly needed to fix a bug on moving notes
-		setField(1, v);
+		this.songData[1] = v;
 		this.noteData = v % ChartingState.GRID_COLUMNS_PER_PLAYER;
 		this.mustPress = (v < ChartingState.GRID_COLUMNS_PER_PLAYER);
 		
@@ -87,14 +54,14 @@ class MetaNote extends Note
 		if(width > height)
 			setGraphicSize(ChartingState.GRID_SIZE);
 		else
-			setGraphicSize(ChartingState.GRID_SIZE);
+			setGraphicSize(0, ChartingState.GRID_SIZE);
 
 		updateHitbox();
 	}
 
 	public function setStrumTime(v:Float)
 	{
-		setField(0, v);
+		this.songData[0] = v;
 		this.strumTime = v;
 	}
 
@@ -103,8 +70,7 @@ class MetaNote extends Note
 	{
 		_lastZoom = zoom;
 		v = Math.round(v / (stepCrochet / 2)) * (stepCrochet / 2);
-		setField(2, Math.max(Math.min(v, stepCrochet * 128), 0));
-		sustainLength = Math.max(Math.min(v, stepCrochet * 128), 0);
+		songData[2] = sustainLength = Math.max(Math.min(v, stepCrochet * 128), 0);
 
 		if(sustainLength > 0)
 		{
@@ -123,7 +89,7 @@ class MetaNote extends Note
 
 	public function updateSustainToZoom(stepCrochet:Float, zoom:Float = 1)
 	{
-		if(_lastZoom != zoom) return;
+		if(_lastZoom == zoom) return;
 		setSustainLength(sustainLength, stepCrochet, zoom);
 	}
 
@@ -147,6 +113,7 @@ class MetaNote extends Note
 				txt.borderStyle = SHADOW;
 				txt.shadowOffset.set(2, 2);
 				txt.borderColor = FlxColor.BLACK;
+				txt.scrollFactor.x = 0;
 				noteTypeTexts.set(num, txt);
 			}
 			else txt = noteTypeTexts.get(num);
@@ -159,7 +126,7 @@ class MetaNote extends Note
 		if(sustainSprite != null && sustainSprite.exists && sustainSprite.visible && sustainLength > 0)
 		{
 			sustainSprite.x = this.x + this.width/2 - sustainSprite.width/2;
-			sustainSprite.y = this.y + this.height/2 - sustainSprite.height/2;
+			sustainSprite.y = this.y + this.height/2;
 			sustainSprite.alpha = this.alpha;
 			sustainSprite.draw();
 		}
@@ -194,6 +161,7 @@ class EventMetaNote extends MetaNote
 
 		eventText = new FlxText(0, 0, 400, '', 12);
 		eventText.setFormat(Paths.font('vcr.ttf'), 12, FlxColor.WHITE, RIGHT);
+		eventText.scrollFactor.x = 0;
 		eventText.antialiasing = ClientPrefs.data.antialiasing;
 		updateEventText();
 	}
@@ -213,7 +181,6 @@ class EventMetaNote extends MetaNote
 		if(eventText != null && eventText.exists && eventText.visible)
 		{
 			eventText.y = this.y + this.height/2 - eventText.height/2;
-			eventText.x = this.x + this.width/2 - eventText.width/2;
 			eventText.alpha = this.alpha;
 			eventText.draw();
 		}

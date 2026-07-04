@@ -17,7 +17,6 @@ import flixel.FlxState;
 import flash.media.Sound;
 
 import backend.Song;
-import backend.ChartTypes;
 import backend.StageData;
 import objects.Character;
 

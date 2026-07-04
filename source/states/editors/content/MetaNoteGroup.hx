@@ -19,21 +19,21 @@ class MetaNoteGroup extends FlxTypedGroup<MetaNote>
         pool.push(n);
     }
 
-    public function spawnNote(chartNote:Dynamic) {
+    public function spawnNote(chartNote:Array<Dynamic>) {
         if (pool.length > 0) {
             _ecyc_e = pool.pop();
             _ecyc_e.exists = true;
         } else {
             _ecyc_e = null;
-            _ecyc_e = new MetaNote(chartNote.strumTime, chartNote.noteData, chartNote);
+            _ecyc_e = new MetaNote(chartNote[0], chartNote[1], chartNote);
             members.push(_ecyc_e);
             ++length;
         }
         recycleData = {
-            strumTime: chartNote.strumTime,
-            noteData: chartNote.noteData,
-            holdLength: chartNote.sustainLength,
-            noteType: chartNote.noteType ?? null,
+            strumTime: chartNote[0],
+            noteData: chartNote[1],
+            holdLength: chartNote[2],
+            noteType: chartNote[3] ?? null,
         };
         return _ecyc_e.recycleNote(recycleData);
     }

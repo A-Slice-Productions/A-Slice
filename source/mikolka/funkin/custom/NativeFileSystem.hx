@@ -11,7 +11,6 @@ import openfl.utils.Assets as OpenFlAssets;
 #end
 #if NATIVE_LOOKUP
 import sys.FileSystem as FileSystem;
-import sys.io.File;
 #end
 
 /**
@@ -261,16 +260,6 @@ class NativeFileSystem
 		sys.FileSystem.deleteFile(addCwd(s));
 		#else
 		trace("We have no FileSystem under us! We can't delete this!");
-		#end
-	}
-
-	// Not available without sys
-	public static function saveContent(path:String, content:String)
-	{
-		#if NATIVE_LOOKUP
-		sys.io.File.saveContent(addCwd(path), content);
-		#else
-		trace("We have no FileSystem under us! We can't save this!");
 		#end
 	}
 
