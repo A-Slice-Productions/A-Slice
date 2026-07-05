@@ -61,9 +61,13 @@ import states.InitState;
         public var mergeThreshold:Int = 500;
         public var mergeDistance:Float = 5.0;
         public var maxNotesBeforeMerge:Int = 1000;
-        public var useAndreHUD:Bool = false;
 
-        // Graphic Settings
+		// Andre HUD Settings
+		public var useAndreHUD:Bool = false;
+		public var andreGhostDensity:Bool = true;
+		public var useAndreHUDNew:Bool = true;
+
+		// Graphic Settings
         public var lowQuality:Bool = false;
         public var antialiasing:Bool = true;
         public var shaders:Bool = true;

@@ -222,6 +222,22 @@ class PlayState extends MusicBeatState
         public var andreMaxOppNPS:Int = 0;
         public var andreActualTotalNotes:Int = 0;
         public var andreVisibleTotalNotes:Int = 0;
+
+        // --- Andre New HUD (Haxe, static cam) ---
+        public var andreNewHUDEnabled:Bool = false;
+        public var andreNewComboOpp:Int = 0;
+        public var andreNewComboPlayer:Int = 0;
+        public var andreNewComboTotal:Int = 0;
+        public var andreNewOppHits:Array<Float> = [];
+        public var andreNewPlayerHits:Array<Float> = [];
+        public var andreNewMaxOppNPS:Int = 0;
+        public var andreNewMaxPlayerNPS:Int = 0;
+        public var andreNewBoxBgs:Array<FlxSprite> = [];
+        public var andreNewBoxLines:Array<FlxSprite> = [];
+        public var andreNewBoxTexts:Array<FlxText> = [];
+        public var andreNewBoxBrackets:Array<Array<FlxSprite>> = [];
+        public var andreNewBoxWidths:Array<Int> = [];
+        public var andreNewBoxXs:Array<Int> = [];
         public var andreNoteTimes:Array<Float> = [];
         public var andreOppTimes:Array<Float> = [];
         public var andrePlayerTimes:Array<Float> = [];
@@ -1224,6 +1240,63 @@ class PlayState extends MusicBeatState
                         add(andreStatsText);
                         andreVisibleTotalNotes = andreActualTotalNotes - ghostNotesCaught;
                         if (andreVisibleTotalNotes < 1) andreVisibleTotalNotes = 1;
+                }
+
+                // --- Andre New HUD Init ---
+                andreNewHUDEnabled = ClientPrefs.data.useAndreHUDNew;
+                if (andreNewHUDEnabled) {
+                        andreNewBoxBgs = [];
+                        andreNewBoxLines = [];
+                        andreNewBoxTexts = [];
+                        andreNewBoxBrackets = [];
+                        andreNewBoxWidths = [];
+                        andreNewBoxXs = [];
+                        
+                        var BOX_HEIGHT = 35;
+                        var BOX_ALPHA = 0.6;
+                        var FONT_SIZE = 16;
+                        var TOP_Y = 10;
+                        var BRACKET_SIZE = 8;
+                        var THICKNESS = 2;
+                        var MAX_WIDTH = 500;
+                        var labels = ["0 / 0", "0 / 0 / 0", "0 / 0"];
+                        var bracketSizes = [BRACKET_SIZE, THICKNESS, BRACKET_SIZE, THICKNESS, BRACKET_SIZE, THICKNESS, BRACKET_SIZE, THICKNESS];
+                        var bracketHeights = [THICKNESS, BRACKET_SIZE, THICKNESS, BRACKET_SIZE, THICKNESS, BRACKET_SIZE, THICKNESS, BRACKET_SIZE];
+                        
+                        for (i in 0...3) {
+                                var bg = new FlxSprite(0, TOP_Y).makeGraphic(MAX_WIDTH, BOX_HEIGHT, FlxColor.BLACK);
+                                bg.alpha = BOX_ALPHA;
+                                bg.cameras = [camOther];
+                                bg.scrollFactor.set();
+                                add(bg);
+                                andreNewBoxBgs.push(bg);
+                                
+                                var line = new FlxSprite(0, TOP_Y + BOX_HEIGHT - 8).makeGraphic(MAX_WIDTH, 2, FlxColor.WHITE);
+                                line.cameras = [camOther];
+                                line.scrollFactor.set();
+                                add(line);
+                                andreNewBoxLines.push(line);
+                                
+                                var brackets:Array<FlxSprite> = [];
+                                for (j in 0...8) {
+                                        var b = new FlxSprite(0, 0).makeGraphic(bracketSizes[j], bracketHeights[j], FlxColor.WHITE);
+                                        b.cameras = [camOther];
+                                        b.scrollFactor.set();
+                                        add(b);
+                                        brackets.push(b);
+                                }
+                                andreNewBoxBrackets.push(brackets);
+                                
+                                var text = new FlxText(0, TOP_Y + 5, 0, labels[i], FONT_SIZE);
+                                text.setFormat(Paths.font("vcr.ttf"), FONT_SIZE, FlxColor.WHITE, CENTER);
+                                text.cameras = [camOther];
+                                text.scrollFactor.set();
+                                add(text);
+                                andreNewBoxTexts.push(text);
+                                
+                                andreNewBoxWidths.push(0);
+                                andreNewBoxXs.push(0);
+                        }
                 }
         }
 
@@ -2769,6 +2842,81 @@ class PlayState extends MusicBeatState
                                 andreStatsBox.updateHitbox();
                                 andreStatsBox.x = andreStatsText.x - 10;
                                 andreStatsBox.y = andreStatsText.y - 5;
+                        }
+                }
+
+                // --- Andre New HUD Update ---
+                if (andreNewHUDEnabled) {
+                        var noBounce:Array<Dynamic> = [];
+                        for (i in 0...3) {
+                                noBounce.push(andreNewBoxBgs[i]);
+                                noBounce.push(andreNewBoxLines[i]);
+                                for (b in andreNewBoxBrackets[i]) noBounce.push(b);
+                                noBounce.push(andreNewBoxTexts[i]);
+                        }
+                        for (obj in noBounce) if (obj != null) obj.scale.set(1, 1);
+
+                        var curPos = Conductor.songPosition;
+                        while (andreNewOppHits.length > 0 && curPos - andreNewOppHits[0] > 1000) andreNewOppHits.shift();
+                        while (andreNewPlayerHits.length > 0 && curPos - andreNewPlayerHits[0] > 1000) andreNewPlayerHits.shift();
+                        var oppNPS = andreNewOppHits.length;
+                        var playerNPS = andreNewPlayerHits.length;
+                        andreNewMaxOppNPS = Std.int(Math.max(andreNewMaxOppNPS, oppNPS));
+                        andreNewMaxPlayerNPS = Std.int(Math.max(andreNewMaxPlayerNPS, playerNPS));
+
+                        andreNewBoxTexts[0].text = andreFormat(oppNPS) + " / " + andreFormat(andreNewMaxOppNPS);
+                        andreNewBoxTexts[1].text = andreFormat(andreNewComboOpp) + " / " + andreFormat(andreNewComboTotal) + " / " + andreFormat(andreNewComboPlayer);
+                        andreNewBoxTexts[2].text = andreFormat(playerNPS) + " / " + andreFormat(andreNewMaxPlayerNPS);
+
+                        var padding = 28;
+                        for (i in 0...3) {
+                                andreNewBoxWidths[i] = Std.int(andreNewBoxTexts[i].width + padding);
+                        }
+
+                        var BOX_HEIGHT = 35;
+                        var BRACKET_SIZE = 8;
+                        var THICKNESS = 2;
+                        var LINE_PADDING = 12;
+                        var BOX_GAP = 8;
+                        var TOP_Y = 10;
+
+                        var midWidth = andreNewBoxWidths[1];
+                        var midX = Std.int((FlxG.width / 2) - (midWidth / 2));
+                        var leftX = midX - andreNewBoxWidths[0] - BOX_GAP;
+                        var rightX = midX + midWidth + BOX_GAP;
+
+                        andreNewBoxXs[0] = leftX;
+                        andreNewBoxXs[1] = midX;
+                        andreNewBoxXs[2] = rightX;
+
+                        for (i in 0...3) {
+                                var x = andreNewBoxXs[i];
+                                var w = andreNewBoxWidths[i];
+                                var bg = andreNewBoxBgs[i];
+                                var line = andreNewBoxLines[i];
+                                var brackets = andreNewBoxBrackets[i];
+                                var text = andreNewBoxTexts[i];
+
+                                bg.setGraphicSize(w, BOX_HEIGHT);
+                                bg.updateHitbox();
+                                bg.x = x;
+
+                                var lineWidth = w - (LINE_PADDING * 2);
+                                line.setGraphicSize(lineWidth, 2);
+                                line.updateHitbox();
+                                line.x = x + LINE_PADDING;
+                                line.y = TOP_Y + BOX_HEIGHT - 8;
+
+                                brackets[0].x = x; brackets[0].y = TOP_Y;
+                                brackets[1].x = x; brackets[1].y = TOP_Y;
+                                brackets[2].x = x + w - BRACKET_SIZE; brackets[2].y = TOP_Y;
+                                brackets[3].x = x + w - THICKNESS; brackets[3].y = TOP_Y;
+                                brackets[4].x = x; brackets[4].y = TOP_Y + BOX_HEIGHT - THICKNESS;
+                                brackets[5].x = x; brackets[5].y = TOP_Y + BOX_HEIGHT - BRACKET_SIZE;
+                                brackets[6].x = x + w - BRACKET_SIZE; brackets[6].y = TOP_Y + BOX_HEIGHT - THICKNESS;
+                                brackets[7].x = x + w - THICKNESS; brackets[7].y = TOP_Y + BOX_HEIGHT - BRACKET_SIZE;
+
+                                text.x = x + Std.int((w - text.width) / 2);
                         }
                 }
                 // Pre Render Image
@@ -5355,6 +5503,7 @@ class PlayState extends MusicBeatState
         function noteMiss(daNote:Note):Void
         { // You didn't hit the key and let it go offscreen, also used by Hurt Notes
                 if (daNote.missed) return;
+                if (andreNewHUDEnabled && daNote.mustPress && !daNote.isSustainNote) andreNewComboPlayer = 0;
                 // Dupe note remove
                 notes.forEachAlive( note -> {
                         if (daNote != note
@@ -5461,7 +5610,12 @@ class PlayState extends MusicBeatState
         var holdAnim:String;
         function opponentNoteHit(note:Note):Void
         {
-                if (andreHUDEnabled && !note.isSustainNote) { if (ghostDensity) { andreOppNotes += Std.int(Math.max(1, note.density)); } else { andreOppNotes++; andreOppHits.push(Conductor.songPosition); } }
+                if (andreHUDEnabled && !note.isSustainNote) { if (ClientPrefs.data.andreGhostDensity) { andreOppNotes += Std.int(Math.max(1, note.density)); } else { andreOppNotes++; andreOppHits.push(Conductor.songPosition); } }
+                if (andreNewHUDEnabled && !note.isSustainNote) {
+                        andreNewComboOpp++;
+                        andreNewComboTotal++;
+                        andreNewOppHits.push(Conductor.songPosition);
+                }
                 if (note.hitByOpponent) return;
 
                 if (noteHitPreEvent) {
@@ -5561,7 +5715,12 @@ class PlayState extends MusicBeatState
         var hitHealth:Float = 0.02;
         public function goodNoteHit(note:Note):Void
         {
-                if (andreHUDEnabled && !note.isSustainNote) { if (ghostDensity) { andrePlayerNotes += Std.int(Math.max(1, note.density)); } else { andrePlayerNotes++; andrePlayerHits.push(Conductor.songPosition); } }
+                if (andreHUDEnabled && !note.isSustainNote) { if (ClientPrefs.data.andreGhostDensity) { andrePlayerNotes += Std.int(Math.max(1, note.density)); } else { andrePlayerNotes++; andrePlayerHits.push(Conductor.songPosition); } }
+                if (andreNewHUDEnabled && !note.isSustainNote) {
+                        andreNewComboPlayer++;
+                        andreNewComboTotal++;
+                        andreNewPlayerHits.push(Conductor.songPosition);
+                }
                 if (note.wasGoodHit || cpuControlled && note.ignoreNote)
                         return;
                 

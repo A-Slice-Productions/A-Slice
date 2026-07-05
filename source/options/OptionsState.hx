@@ -24,6 +24,7 @@ class OptionsState extends MusicBeatState
 		'Graphics',
 		'Visuals',
 		'Gameplay',
+		'Andre HUD',
 		'P-Slice Options',
 		#if (TOUCH_CONTROLS_ALLOWED || mobile) 'Mobile Options', #end
 		'Export & Import Settings'
@@ -70,6 +71,8 @@ class OptionsState extends MusicBeatState
 				openSubState(new options.VisualsSettingsSubState());
 			case 'Gameplay':
 				openSubState(new options.GameplaySettingsSubState());
+			case 'Andre HUD':
+				openSubState(new options.AndreHUDSettingsSubState());
 			case 'Adjust Delay and Combo':
 				MusicBeatState.switchState(new options.NoteOffsetState());
 			case 'P-Slice Options':
