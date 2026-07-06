@@ -165,10 +165,17 @@ class OptimizeSettingsSubState extends BaseOptionsMenu
 			"If checked, You can play the main game without GC lag.\nIt only works on loading/playing charts.",
 			'disableGC',
 			BOOL);
-		addOption(option);
+                addOption(option);
 
-		super();
-	}
+                var option:Option = new Option('Merge Streaming',
+                        "If checked, the chart loader will look for split song JSONs in the song folder and merge them into one chart.\nExamples:\n- example-2.json, example-3.json...\n- example-part2.json, example-part3.json...",
+                        'mergeStreaming',
+                        BOOL);
+                addOption(option);
+
+                super();
+        }
+
 
 	function onChangeLimitCount(){
 		limitCount.scrollSpeed = interpolate(30, 50000, (holdTime - 0.5) / 10, 3);

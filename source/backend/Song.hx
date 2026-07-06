@@ -5,6 +5,9 @@ import haxe.Json;
 import backend.SongJson;
 import lime.utils.Assets;
 
+import backend.ClientPrefs;
+
+
 import objects.Note;
 
 using StringTools;
@@ -162,44 +165,45 @@ class Song
 		// Parse the base JSON file first (e.g., example.json)
 		var baseSong:SwagSong = parseJSON(rawData, jsonInput);
 
-		// Loop to find and merge split parts automatically
-		var partNum:Int = 2;
-		while(true)
+		// Merge streaming split chart parts automatically (opt-in via ClientPrefs)
+		// Supports sequential numeric suffix files:
+		//  - song-2.json, song-3.json...
+		//  - song-part2.json, song-part3.json...
+		if(ClientPrefs.data.mergeStreaming)
 		{
-			var partData:String = null;
-			
-			// Pattern A: example-2.json
-			var pathPatternA:String = Paths.json('$formattedFolder/$formattedSong-$partNum');
-			// Pattern B: example-part2.json
-			var pathPatternB:String = Paths.json('$formattedFolder/$formattedSong-part$partNum');
-			
-			if(NativeFileSystem.exists(pathPatternA)) {
-				partData = NativeFileSystem.getContent(pathPatternA);
-			} else if(NativeFileSystem.exists(pathPatternB)) {
-				partData = NativeFileSystem.getContent(pathPatternB);
-			}
+			var partNum:Int = 2;
+			while(true)
+			{
+				var partData:String = null;
+				var pathPatternA:String = Paths.json('$formattedFolder/$formattedSong-$partNum');
+				var pathPatternB:String = Paths.json('$formattedFolder/$formattedSong-part$partNum');
 
-			// If a split file is found, parse it and append its contents
-			if(partData != null) {
-				var partSong:SwagSong = parseJSON(partData, jsonInput);
-				if(partSong != null) {
-					// Merge notes
-					if(partSong.notes != null) {
-						if(baseSong.notes == null) baseSong.notes = [];
-						baseSong.notes = baseSong.notes.concat(partSong.notes);
-					}
-					// Merge events
-					if(partSong.events != null) {
-						if(baseSong.events == null) baseSong.events = [];
-						baseSong.events = baseSong.events.concat(partSong.events);
-					}
+				if(NativeFileSystem.exists(pathPatternA)) {
+					partData = NativeFileSystem.getContent(pathPatternA);
+				} else if(NativeFileSystem.exists(pathPatternB)) {
+					partData = NativeFileSystem.getContent(pathPatternB);
 				}
-				partNum++; // Move to the next part (e.g., -3 or -part3)
-			} else {
-				// No more sequential split parts found, stop looking
-				break;
+
+				if(partData != null) {
+					var partSong:SwagSong = parseJSON(partData, jsonInput);
+					if(partSong != null) {
+						if(partSong.notes != null) {
+							if(baseSong.notes == null) baseSong.notes = [];
+							baseSong.notes = baseSong.notes.concat(partSong.notes);
+						}
+						if(partSong.events != null) {
+							if(baseSong.events == null) baseSong.events = [];
+							baseSong.events = baseSong.events.concat(partSong.events);
+						}
+					}
+					partNum++;
+				}
+				else {
+					break;
+				}
 			}
 		}
+
 
 		return baseSong;
 	}

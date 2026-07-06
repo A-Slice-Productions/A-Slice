@@ -20,7 +20,7 @@ class AndreHUDSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Ghost Density (Andre HUD)',
-			"If checked, counts note density for Andre HUD's real note counter.\nWorks with 'Overlapped Density' option in Gameplay settings.",
+			"If checked, counts note density for Andre HUD's real note counter.\nWorks with 'Overlapped Density' option in Gameplay settings.\nApplies to both AndreJr HUD and Andre New HUD.",
 			'andreGhostDensity',
 			BOOL);
 		addOption(option);

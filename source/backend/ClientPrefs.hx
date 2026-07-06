@@ -62,6 +62,13 @@ import states.InitState;
         public var mergeDistance:Float = 5.0;
         public var maxNotesBeforeMerge:Int = 1000;
 
+        // Optimizations
+        // When enabled, Song loader will merge split chart JSONs from the song folder:
+        //  - song-2.json, song-3.json...
+        //  - song-part2.json, song-part3.json...
+        public var mergeStreaming:Bool = true;
+
+
 		// Andre HUD Settings
 		public var useAndreHUD:Bool = false;
 		public var andreGhostDensity:Bool = true;

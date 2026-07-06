@@ -1297,6 +1297,12 @@ class PlayState extends MusicBeatState
                                 andreNewBoxWidths.push(0);
                                 andreNewBoxXs.push(0);
                         }
+
+                        // Ghost density starts by clearing the history so the first 1s window doesn't start at 0.
+                        andreNpsHistory = [];
+                        andreNewMaxOppNPS = 0;
+                        andreNewMaxPlayerNPS = 0;
+                        andreNewComboOpp = andreNewComboPlayer = andreNewComboTotal = 0;
                 }
         }
 
@@ -2180,8 +2186,9 @@ class PlayState extends MusicBeatState
                         var sustainNote:CastNote;
                         var burst = null;
 
-                        var chartNoteData:Int = 0;
-                        var strumTimeVector:Vector<Float> = new Vector(8, 0.0);
+var chartNoteData:Int = 0;
+			var strumTimeVector:Vector<Float> = new Vector(8, 0.0);
+			var lastNoteIndex:Vector<Int> = new Vector(8, -1);
 
                         var updateElapse:Float = 0.01;
                         var syncTime:Float = Timer.stamp();
@@ -2237,16 +2244,23 @@ class PlayState extends MusicBeatState
                                         noteColumn = Std.int(chartNoteData % totalColumns);
                                         gottaHitNote = (chartNoteData < totalColumns);
 
-                                        // CLEAR ANY POSSIBLE GHOST NOTES WHEN IF THE OPTION ENABLED
-                                        if (skipGhostNotes && sectionNoteCnt != 0 && !worldRecordMode) {
-                                                if (Math.abs(strumTimeVector[chartNoteData] - strumTime) <= removeTime) {
-                                                        ghostNotesCaught++;
-                                                        (ghostDensity && !worldRecordMode) ? swagNote.density++ : swagNote.density = 1;
-                                                        continue;
-                                                } else {
-                                                        strumTimeVector[chartNoteData] = strumTime;
-                                                }
-                                        }
+// CLEAR ANY POSSIBLE GHOST NOTES WHEN IF THE OPTION ENABLED
+						if (skipGhostNotes && sectionNoteCnt != 0 && !worldRecordMode) {
+								if (Math.abs(strumTimeVector[chartNoteData] - strumTime) <= removeTime) {
+										ghostNotesCaught++;
+										if (ghostDensity && !worldRecordMode) {
+												var lastIdx = lastNoteIndex[chartNoteData];
+												if (lastIdx >= 0 && lastIdx < cnt) {
+														var lastNote = unspawnNotes[lastIdx];
+														if (lastNote.density != null) lastNote.density++;
+														else lastNote.density = 2;
+												}
+										}
+										continue;
+								} else {
+										strumTimeVector[chartNoteData] = strumTime;
+								}
+						}
                                         
                                         swagNote = {
                                                 strumTime: songNotes[0],
@@ -2262,46 +2276,47 @@ class PlayState extends MusicBeatState
                                                 if (burst != null) swagNote.cmpSpam = burst;
                                         }
                                         
-                                        swagNote.noteData |= gottaHitNote ? 1<<8 : 0; // mustHit
-                                        swagNote.noteData |= (section.gfSection && (gfSide ? gottaHitNote : !gottaHitNote)) || songNotes[3] == 'GF Sing' || songNotes[3] == 4 ? 1<<11 : 0; // gfNote
-                                        swagNote.noteData |= (section.altAnim || (songNotes[3] == 'Alt Animation' || songNotes[3] == 1)) ? 1<<12 : 0; // altAnim
-                                        swagNote.noteData |= (songNotes[3] == 'No Animation' || songNotes[3] == 5) ? 1<<13 : 0; // noAnimation & noMissAnimaiton
-                                        
-                                        unspawnNotes[cnt] = swagNote;
+swagNote.noteData |= gottaHitNote ? 1<<8 : 0; // mustHit
+						swagNote.noteData |= (section.gfSection && (gfSide ? gottaHitNote : !gottaHitNote)) || songNotes[3] == 'GF Sing' || songNotes[3] == 4 ? 1<<11 : 0; // gfNote
+						swagNote.noteData |= (section.altAnim || (songNotes[3] == 'Alt Animation' || songNotes[3] == 1)) ? 1<<12 : 0; // altAnim
+						swagNote.noteData |= (songNotes[3] == 'No Animation' || songNotes[3] == 5) ? 1<<13 : 0; // noAnimation & noMissAnimaiton
 
-                                        if (songNotes[2] > 0.0)
-                                        {
-                                                swagNote.holdLength = songNotes[2];
+						unspawnNotes[cnt] = swagNote;
+						lastNoteIndex[chartNoteData] = cnt;
 
-                                                curStepCrochet = 15000 / daBpm;
-                                                roundSus = Math.round(swagNote.holdLength / curStepCrochet);
-                                                if (roundSus > 0)
-                                                {
-                                                        for (susNote in 0...roundSus + 1)
-                                                        {
-                                                                sustainNote = {
-                                                                        strumTime: swagNote.strumTime + curStepCrochet * susNote,
-                                                                        noteData: swagNote.noteData,
-                                                                        noteType: swagNote.noteType
-                                                                };
-                                                                if (!Math.isNaN(swagNote.density)) sustainNote.density = swagNote.density;
+						if (songNotes[2] > 0.0)
+						{
+								swagNote.holdLength = songNotes[2];
 
-                                                                sustainNote.noteData |= 1<<9; // isHold
-                                                                sustainNote.noteData |= susNote == roundSus ? 1<<10 : 0; // isHoldEnd
+								curStepCrochet = 15000 / daBpm;
+								roundSus = Math.round(swagNote.holdLength / curStepCrochet);
+								if (roundSus > 0)
+								{
+										for (susNote in 0...roundSus + 1)
+										{
+												sustainNote = {
+														strumTime: swagNote.strumTime + curStepCrochet * susNote,
+														noteData: swagNote.noteData,
+														noteType: swagNote.noteType
+												};
+												if (!Math.isNaN(swagNote.density)) sustainNote.density = swagNote.density;
 
-                                                                unspawnSustainNotes.push(sustainNote);
+												sustainNote.noteData |= 1<<9; // isHold
+												sustainNote.noteData |= susNote == roundSus ? 1<<10 : 0; // isHoldEnd
 
-                                                                ++sustainNoteCnt;
-                                                        }
-                                                        sustainTotalCnt += sustainNoteCnt;
-                                                }
-                                        }
-                                        
-                                        if (!noteTypes.contains(swagNote.noteType))
-                                                noteTypes.push(swagNote.noteType);
+												unspawnSustainNotes.push(sustainNote);
 
-                                        showProgress();
-                                        ++sectionNoteCnt; ++cnt;
+												++sustainNoteCnt;
+										}
+										sustainTotalCnt += sustainNoteCnt;
+								}
+						}
+
+						if (!noteTypes.contains(swagNote.noteType))
+								noteTypes.push(swagNote.noteType);
+
+						showProgress();
+						++sectionNoteCnt; ++cnt;
                                 }
                                 notes += sectionNoteCnt;
                                 ++secCnt;
@@ -2845,7 +2860,7 @@ class PlayState extends MusicBeatState
                         }
                 }
 
-                // --- Andre New HUD Update ---
+// --- Andre New HUD Update ---
                 if (andreNewHUDEnabled) {
                         var noBounce:Array<Dynamic> = [];
                         for (i in 0...3) {
@@ -2857,16 +2872,80 @@ class PlayState extends MusicBeatState
                         for (obj in noBounce) if (obj != null) obj.scale.set(1, 1);
 
                         var curPos = Conductor.songPosition;
-                        while (andreNewOppHits.length > 0 && curPos - andreNewOppHits[0] > 1000) andreNewOppHits.shift();
-                        while (andreNewPlayerHits.length > 0 && curPos - andreNewPlayerHits[0] > 1000) andreNewPlayerHits.shift();
-                        var oppNPS = andreNewOppHits.length;
-                        var playerNPS = andreNewPlayerHits.length;
-                        andreNewMaxOppNPS = Std.int(Math.max(andreNewMaxOppNPS, oppNPS));
-                        andreNewMaxPlayerNPS = Std.int(Math.max(andreNewMaxPlayerNPS, playerNPS));
 
-                        andreNewBoxTexts[0].text = andreFormat(oppNPS) + " / " + andreFormat(andreNewMaxOppNPS);
-                        andreNewBoxTexts[1].text = andreFormat(andreNewComboOpp) + " / " + andreFormat(andreNewComboTotal) + " / " + andreFormat(andreNewComboPlayer);
-                        andreNewBoxTexts[2].text = andreFormat(playerNPS) + " / " + andreFormat(andreNewMaxPlayerNPS);
+                        // Ghost density combo/NPS (combo windows based on chart note density, like AndreJr)
+                        if (ClientPrefs.data.ghostDensity) {
+                                var lo = 0;
+                                var hi = andreOppTimes.length - 1;
+                                var oppCount = 0;
+                                while (lo <= hi) {
+                                        var m = (lo + hi) >> 1;
+                                        if (andreOppTimes[m] <= curPos) {
+                                                oppCount = m + 1;
+                                                lo = m + 1;
+                                        } else hi = m - 1;
+                                }
+
+                                lo = 0;
+                                hi = andrePlayerTimes.length - 1;
+                                var playerCount = 0;
+                                while (lo <= hi) {
+                                        var m = (lo + hi) >> 1;
+                                        if (andrePlayerTimes[m] <= curPos) {
+                                                playerCount = m + 1;
+                                                lo = m + 1;
+                                        } else hi = m - 1;
+                                }
+
+                                var now = curPos;
+
+                                // track changing counts for a 1-second rolling window
+                                if (oppCount > lastOppCountForNps) {
+                                        var diff = oppCount - lastOppCountForNps;
+                                        for (i in 0...diff)
+                                                andreNpsHistory.push({t: now, o: lastOppCountForNps + i + 1, p: playerCount});
+                                        lastOppCountForNps = oppCount;
+                                }
+
+                                if (playerCount > lastPlayerCountForNps) {
+                                        var diff = playerCount - lastPlayerCountForNps;
+                                        for (i in 0...diff)
+                                                andreNpsHistory.push({t: now, o: oppCount, p: lastPlayerCountForNps + i + 1});
+                                        lastPlayerCountForNps = playerCount;
+                                }
+
+                                while (andreNpsHistory.length > 0 && now - andreNpsHistory[0].t > 1000)
+                                        andreNpsHistory.shift();
+
+                                var first = andreNpsHistory.length > 0 ? andreNpsHistory[0] : {t: now, o: oppCount, p: playerCount};
+                                var oppNpsCombo = oppCount - first.o;
+                                var playerNpsCombo = playerCount - first.p;
+                                var totalNpsCombo = (oppCount + playerCount) - (first.o + first.p);
+
+                                if (oppNpsCombo > andreNewMaxOppNPS) andreNewMaxOppNPS = oppNpsCombo;
+                                if (playerNpsCombo > andreNewMaxPlayerNPS) andreNewMaxPlayerNPS = playerNpsCombo;
+                                if (totalNpsCombo > andreNewComboTotal) andreNewComboTotal = totalNpsCombo;
+
+                                andreNewComboOpp = oppNpsCombo;
+                                andreNewComboPlayer = playerNpsCombo;
+                                // andreNewComboTotal is rolling max-like totalNpsCombo
+
+                                andreNewBoxTexts[0].text = andreFormat(oppNpsCombo) + " / " + andreFormat(andreNewMaxOppNPS);
+                                andreNewBoxTexts[1].text = andreFormat(andreNewComboOpp) + " / " + andreFormat(andreNewComboTotal) + " / " + andreFormat(andreNewComboPlayer);
+                                andreNewBoxTexts[2].text = andreFormat(playerNpsCombo) + " / " + andreFormat(andreNewMaxPlayerNPS);
+                        } else {
+                                while (andreNewOppHits.length > 0 && curPos - andreNewOppHits[0] > 1000) andreNewOppHits.shift();
+                                while (andreNewPlayerHits.length > 0 && curPos - andreNewPlayerHits[0] > 1000) andreNewPlayerHits.shift();
+                                var oppNPS = andreNewOppHits.length;
+                                var playerNPS = andreNewPlayerHits.length;
+                                andreNewMaxOppNPS = Std.int(Math.max(andreNewMaxOppNPS, oppNPS));
+                                andreNewMaxPlayerNPS = Std.int(Math.max(andreNewMaxPlayerNPS, playerNPS));
+
+                                // combo values already computed elsewhere (existing logic)
+                                andreNewBoxTexts[0].text = andreFormat(oppNPS) + " / " + andreFormat(andreNewMaxOppNPS);
+                                andreNewBoxTexts[1].text = andreFormat(andreNewComboOpp) + " / " + andreFormat(andreNewComboTotal) + " / " + andreFormat(andreNewComboPlayer);
+                                andreNewBoxTexts[2].text = andreFormat(playerNPS) + " / " + andreFormat(andreNewMaxPlayerNPS);
+                        }
 
                         var padding = 28;
                         for (i in 0...3) {
@@ -5612,8 +5691,13 @@ class PlayState extends MusicBeatState
         {
                 if (andreHUDEnabled && !note.isSustainNote) { if (ClientPrefs.data.andreGhostDensity) { andreOppNotes += Std.int(Math.max(1, note.density)); } else { andreOppNotes++; andreOppHits.push(Conductor.songPosition); } }
                 if (andreNewHUDEnabled && !note.isSustainNote) {
-                        andreNewComboOpp++;
-                        andreNewComboTotal++;
+                        if (ClientPrefs.data.andreGhostDensity) {
+                            andreNewComboOpp += Std.int(Math.max(1, note.density));
+                            andreNewComboTotal += Std.int(Math.max(1, note.density));
+                        } else {
+                            andreNewComboOpp++;
+                            andreNewComboTotal++;
+                        }
                         andreNewOppHits.push(Conductor.songPosition);
                 }
                 if (note.hitByOpponent) return;
@@ -5717,8 +5801,13 @@ class PlayState extends MusicBeatState
         {
                 if (andreHUDEnabled && !note.isSustainNote) { if (ClientPrefs.data.andreGhostDensity) { andrePlayerNotes += Std.int(Math.max(1, note.density)); } else { andrePlayerNotes++; andrePlayerHits.push(Conductor.songPosition); } }
                 if (andreNewHUDEnabled && !note.isSustainNote) {
-                        andreNewComboPlayer++;
-                        andreNewComboTotal++;
+                        if (ClientPrefs.data.andreGhostDensity) {
+                            andreNewComboPlayer += Std.int(Math.max(1, note.density));
+                            andreNewComboTotal += Std.int(Math.max(1, note.density));
+                        } else {
+                            andreNewComboPlayer++;
+                            andreNewComboTotal++;
+                        }
                         andreNewPlayerHits.push(Conductor.songPosition);
                 }
                 if (note.wasGoodHit || cpuControlled && note.ignoreNote)
