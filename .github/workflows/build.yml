@@ -28,7 +28,7 @@ on:
 
 env:
   HAXE_VERSION: 4.3.6
-  PROJECT_NAME: H-Slice+JS
+  PROJECT_NAME: A-Slice
 
 jobs:
   build:
@@ -44,6 +44,7 @@ jobs:
         uses: krdlab/setup-haxe@master
         with:
           haxe-version: ${{ env.HAXE_VERSION }}
+
       - name: Set XCode app
         if: inputs.os == 'macos-15'
         run: sudo xcode-select -s /Applications/Xcode_16.4.app
@@ -52,7 +53,6 @@ jobs:
         id: load-lib-cache
         uses: actions/cache@v3
         with:
-          # not caching the bin folder to prevent asset duplication and stuff like that
           key: ${{ inputs.cacheLibrariesPath }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
@@ -60,18 +60,17 @@ jobs:
             .haxelib/
           restore-keys: |
             ${{ inputs.cacheLibrariesPath }}
+
       - name: Restore existing build cache for faster compilation
         id: load-cache
         uses: actions/cache@v3
         with:
-          # not caching the bin folder to prevent asset duplication and stuff like that
           key: ${{ inputs.cachePath }}
           path: |
             export/release/${{ inputs.exportPath }}/haxe/
             export/release/${{ inputs.exportPath }}/obj/
           restore-keys: |
             cache-build-${{ inputs.exportPath }}
-            
 
       - name: Install libVLC
         if: inputs.exportPath == 'linux'
@@ -88,24 +87,24 @@ jobs:
       - name: Compile
         run: haxelib run lime build ${{ inputs.buildArgs }}
 
-      # are you sure is this okay to comment out bro
+      # To use this, add secrets 'A_SLICE_PASSWORD' and 'A_SLICE_KEYSTORE' to your repo secrets.
       # - name: Sign APK with the proper key
       #   if: inputs.exportPath == 'android'
       #   env:
       #     OUT_DIR: ./export/release/android/bin/app/build/outputs/apk/release/
-      #     SIGNING_KEY: ${{ secrets.HRK_EXEX_PASSWORD }}
+      #     SIGNING_KEY: ${{ secrets.A_SLICE_PASSWORD }}
       #     SIGNING_ALIAS: hslice
-      #     SIGNING_FILE: ${{ secrets.HRK_EXEX_KEYSTORE }}
+      #     SIGNING_FILE: ${{ secrets.A_SLICE_KEYSTORE }}
       #   run: |
       #     rm -f ./hslice.keystore;
       #     echo $SIGNING_FILE | base64 -d > ./hslice.keystore;
       #     sha256sum ./hslice.keystore;
-
-      #     mv '${{env.OUT_DIR}}H-Slice+JS-release.apk' '${{env.OUT_DIR}}H-Slice+JS-unsigned.apk';
-      #     $ANDROID_HOME/build-tools/35.0.1/zipalign -P 16 -f -v 4 '${{env.OUT_DIR}}H-Slice+JS-unsigned.apk' '${{env.OUT_DIR}}H-Slice+JS-release.apk' > /dev/null;
-
-      #     $ANDROID_HOME/build-tools/35.0.1/apksigner sign --ks hslice.keystore --ks-key-alias $SIGNING_ALIAS --ks-pass "env:SIGNING_KEY" --key-pass "env:SIGNING_KEY" '${{env.OUT_DIR}}H-Slice+JS-release.apk';
-      #     rm '${{env.OUT_DIR}}H-Slice+JS-unsigned.apk';
+      #
+      #     mv '${{env.OUT_DIR}}A-Slice-release.apk' '${{env.OUT_DIR}}A-Slice-unsigned.apk';
+      #     $ANDROID_HOME/build-tools/35.0.1/zipalign -P 16 -f -v 4 '${{env.OUT_DIR}}A-Slice-unsigned.apk' '${{env.OUT_DIR}}A-Slice-release.apk' > /dev/null;
+      #
+      #     $ANDROID_HOME/build-tools/35.0.1/apksigner sign --ks hslice.keystore --ks-key-alias $SIGNING_ALIAS --ks-pass "env:SIGNING_KEY" --key-pass "env:SIGNING_KEY" '${{env.OUT_DIR}}A-Slice-release.apk';
+      #     rm '${{env.OUT_DIR}}A-Slice-unsigned.apk';
 
       - name: Make IPA
         if: inputs.name == 'iOS'
@@ -131,7 +130,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               });
-      
+        
               for (const cache of caches.data.actions_caches) {
                 if (cache.key === "${{ inputs.cachePath }}") {
                   console.log('Clearing ' + cache.key + '...');
@@ -146,6 +145,7 @@ jobs:
             } catch (error) {
               console.error("Failed to clear cache:", error);
             }
+
       - name: Uploading new cache
         uses: actions/cache@v3
         with:
