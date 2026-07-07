@@ -1,182 +1,142 @@
-h slice but it has the best optiomzation optimization It has the&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;optimzation
-
 <h1 align="center">
   <br>
-  <a href="https://github.com/HRK-EXEX/H-Slice">
-    <img src="/art/desktop/iconOG.png" alt="H-Slice" width="150">
+  <a href="https://github.com/AndreNicholasJr/A-Slice">
+    <img src="/art/icon.png" alt="A-Slice Engine" width="150">
   </a>
   <br>
-  <b>H-Slice+JS Engine</b>
+  <b>A-Slice Engine</b>
   <br>
 </h1>
 
 <p align="center">
-  <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/HRK-EXEX/H-Slice">
-  <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/HRK-EXEX/H-Slice">
-  <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/HRK-EXEX/H-Slice">
+  <b>The optimized evolution of H-Slice, focused on extreme performance and large-scale FNF charts.</b>
+</p>
+
+<p align="center">
+  <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/AndreNicholasJr/A-Slice">
+  <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/AndreNicholasJr/A-Slice">
+  <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/AndreNicholasJr/A-Slice">
   <img src="https://img.shields.io/badge/LUA-262626?style=for-the-badge&logo=lua">
   <img src="https://img.shields.io/badge/-HAXE-262626.svg?logo=haxe&style=for-the-badge">
 </p>
 
-## Introduction
+---
 
-Welcome to **H-Slice+JS** (formerly H-Slice), a Friday Night Funkin' engine optimized for handling large charts efficiently.
+# 🚀 About A-Slice
 
-This engine builds upon features from my previous engine and may include new features in the future.
+**A-Slice Engine** is a heavily optimized Friday Night Funkin' engine built from the foundation of **H-Slice**, with the goal of pushing performance further and handling extremely large charts efficiently.
 
-### *If you plan to integrate my features into your own engine,*
-### *Please contact to hrk first and CREDIT H-SLICE+JS.*
+A-Slice focuses on:
 
-**Note:** This engine is designed for playing large, unplayable charts using BOTPLAY. It is not intended for regular gameplay.
+- ⚡ High-performance gameplay
+- 📈 Handling massive note counts
+- 🛠️ Better optimization systems
+- 🎵 Large-scale chart support
+- 🔧 Improved engine flexibility
+- 🚀 Future experimental features
 
-### Social Media
-*While credit isn't mandatory, I would greatly appreciate it if you credited me.*
+A-Slice is designed for creators who want to push FNF beyond normal limits.
 
-- **Discord**: [hrk.exex](https://discord.gg/SzXbVkqmG9) *(Phone verification required)*
-- **Twitter**: [@hrek_hexex](https://x.com/Hrek_Hexex)
-- **Bluesky**: [@hrekexexex](https://bsky.app/profile/hrekexkex.bsky.social) *(For emergencies if Discord or Twitter is unavailable)*
+---
 
+# ⭐ Main Features
 
-<details>
-  <summary><h2>Original P-Slice Description</h2></summary>
-<!-- Thanks soushimiya for this README template! -->
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
-<a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
+## ⚡ Extreme Optimization
 
+A-Slice includes multiple optimization improvements designed to reduce lag and improve stability.
 
+Features include:
 
-<!-- PROJECT SHIELDS -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+- Optimized note handling
+- Reduced unnecessary event processing
+- Better memory management
+- Improved rendering performance
+- Faster chart loading
+- Better support for large songs
 
+---
 
+## 🎵 Massive Chart Support
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/Psych-Slice/P-Slice">
-    <img src="art/banner.png" alt="Logo" width="300" height="200">
-  </a>
+A-Slice is built with large and complex charts in mind.
 
-<h3 align="center">P-Slice Engine</h3>
+The engine aims to support:
 
-  <p align="center">
-    Crossover between Psych Engine and newer versions of FNF (also known as V-Slice)
-    <br />
-    <a href="https://github.com/Psych-Slice/P-Slice/wiki"><strong>Explore the Wiki »</strong></a>
-    <br />
-    <br />
-    ·
-    <a href="https://github.com/Psych-Slice/P-Slice/issues">Report Bug or Request Feature</a>
-    ·
-    <a href="https://github.com/Psych-Slice/P-Slice/pulls">Create Pull Request</a>
-  </p>
-</div>
+- Millions of notes
+- Extremely long songs
+- Heavy event usage
+- High-density gameplay sections
 
-#### Made With
-<img src="https://img.shields.io/badge/-HAXE-262626.svg?logo=haxe&style=for-the-badge">
+*(Performance depends on hardware and chart complexity.)*
 
+---
 
-<!-- ABOUT THE PROJECT -->
-## About
+## 🔥 Built For Experimentation
 
-P-Slice engine is a crossover between Psych Engine and the newest version of Friday Night Funkin.
+A-Slice is not only an engine — it's a place to test new ideas.
 
-It's meant to bring new visuals and features from newer versions of FNF and make changes to the existing ones to make them feel closer to the ones in the V-Slice.
+Possible future features:
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+- New modding systems
+- Advanced optimization tools
+- Better scripting support
+- Experimental gameplay features
+- New ways to handle FNF content
 
-## Features
-| V-Slice's freeplay menu | Results screen|
-|-|-|
-|![](https://github.com/Psych-Slice/misc/blob/main/showcase/freeplay.png?raw=true) | ![](https://github.com/Psych-Slice/misc/blob/main/showcase/result.png?raw=true)|
-|Character selector|Pausable cutscenes|
-|![](https://github.com/Psych-Slice/misc/blob/main/showcase/character.png?raw=true)|![](https://github.com/Psych-Slice/misc/blob/main/showcase/pause.png?raw=true)|
-|Pico|Player editor|
-|![](https://github.com/Psych-Slice/misc/blob/main/showcase/pico.png?raw=true)|![](https://github.com/Psych-Slice/misc/blob/main/showcase/playerEditor.png?raw=true)|
-<!-- GETTING STARTED -->
-## Getting Started
+---
 
-Pre-built engine can be downloaded from [GameBanana](https://gamebanana.com/mods/535203).
-Also, Nightly/Beta builds can be downloaded from [Github Actions](https://github.com/Psych-Slice/P-Slice/actions/workflows/main.yml). (You need to make a Github account.)
+# 🆚 A-Slice vs H-Slice
 
+| Feature | H-Slice | A-Slice |
+|---------|---------|---------|
+| Large chart support | ✅ | ✅ Improved |
+| Optimization | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Note handling | Fast | Faster |
+| Experimental features | Limited | Expanding |
+| Future development | Original | New direction |
 
-If you wanna compile this engine, Please check out <a href="#build">here!</a>
+A-Slice continues the idea of optimized FNF engines while adding new improvements and experiments.
 
-<a id="build"></a>
+---
+
+# 🤖 AI-Assisted Development
+
+Some parts of A-Slice development may use AI as a development tool.
+
+AI helps with:
+
+- Brainstorming ideas
+- Exploring solutions
+- Testing concepts
+- Improving development speed
+
+However, every feature still requires:
+
+- Testing
+- Debugging
+- Optimization
+- Human decisions
+
+A tool is only as good as how it is used.
+
+---
+
+# 📦 Installation
+
+## Requirements
+
+- Haxe 4.3+
+- Lime
+- OpenFL
+- Git
+- Visual Studio (Windows)
+- VLC (Linux)
+
+---
+
 ## Building
-### Dependencies
-* git
-* (Windows-only) Microsoft Visual Studio Community
-* (Linux-only) VLC
-* Haxe (4.3.6 or greater)
 
+Clone the repository:
 
-(If you are using windows)
-After installing git, it is RECOMMENDED that you open up a command prompt window and type the following
-  ```sh
-  curl -# -O https://download.visualstudio.microsoft.com/download/pr/3105fcfe-e771-41d6-9a1c-fc971e7d03a7/8eb13958dc429a6e6f7e0d6704d43a55f18d02a253608351b6bf6723ffdaf24e/vs_Community.exe
-vs_Community.exe --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041 -p
-  ```
-
-head into the setup folder located in the root directory of this repository, and execute the setup script:
-- ```Windows.bat```  for Windows.
-- ```Unix.sh``` for Mac/Linux.
-
-
-Run
-   ```sh
-   lime test <platform>
-   ```
-   where ```<platform>``` gets replaced with windows, linux, or mac (I also like to add ```-final``` flag, but you should be fine without it)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-### Branches
-`master` is the repository's main branch. It contains a PE 1.0 flavor of P-Slice and is the most maintained version.
-
-`master-dev` same as `master`, but it is used for development so it might contain less stable builds.
-
-`pe-0.6.3` works the same way, but built on Psych 0.6.3. Note that it may contain some bugs not present in the master version.
-
-`pe-0.6.3-dev` same as `pe-0.6.3`, but it is used for development so it might contain less stable builds.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the Apache License 2.0. See [Licence](https://github.com/Psych-Slice/blob/P-Slice/master/LICENSE) for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/Psych-Slice/P-Slice.svg?style=for-the-badge
-[contributors-url]: https://github.com/Psych-Slice/P-Slice/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Psych-Slice/P-Slice.svg?style=for-the-badge
-[forks-url]: https://github.com/Psych-Slice/P-Slice/forks
-[https://github.com/Psych-Slice/P-Slice/forks]: https://github.com/Psych-Slice/P-Slice/network/members
-[stars-shield]: https://img.shields.io/github/stars/Psych-Slice/P-Slice.svg?style=for-the-badge
-[stars-url]: https://github.com/Psych-Slice/P-Slice/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Psych-Slice/P-Slice.svg?style=for-the-badge
-[issues-url]: https://github.com/Psych-Slice/P-Slice/issues
-[license-shield]: https://img.shields.io/github/license/Psych-Slice/P-Slice.svg?style=for-the-badge
-[license-url]: https://github.com/Psych-Slice/P-Slice/blob/master/LICENSE.txt!
-h slice but it has the best optiomzation optimization It has the                                                                                  optimzation
+```bash
+git clone https://github.com/AndreNicholasJr/A-Slice.git
