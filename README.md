@@ -134,7 +134,14 @@ A tool is only as good as how it is used.
 
 ---
 
-## Building
+## Testing Place
+
+Testing Place Link: https://github.com/SENAndrhevn23/A-Slice-TP
+
+
+---
+
+## Building 
 
 Clone the repository:
 
