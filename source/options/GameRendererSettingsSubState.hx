@@ -279,7 +279,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		messageTextBG.visible = true;
 
 		if (noFFMpeg) {
-			messageText.text = "ERROR WHILE TESTING FFMPEG FEATURE:\nYou don't have 'FFMpeg.exe' in same Folder as H-Slice+JS.";
+			messageText.text = "ERROR WHILE TESTING FFMPEG FEATURE:\nYou don't have 'FFMpeg.exe' in same Folder as A-Slice.";
 			
 			FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.data.sfxVolume);
 		} else {

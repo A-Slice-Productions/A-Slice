@@ -186,7 +186,7 @@ class UserErrorSubstate extends MusicBeatSubstate
 	function printError(error:CrashData)
 	{
 		var star = #if (CHECK_FOR_UPDATES || debug) "" #else "*" #end;
-		printToTrace('H-SLICE ${MainMenuState.hrkVersion}$star (${error.message})');
+		printToTrace('A-Slice v${MainMenuState.hrkVersion}$star (${error.message})');
 		textNextY += 35;
 		FlxTimer.wait(1 / 24, () ->
 		{
@@ -232,7 +232,7 @@ class UserErrorSubstate extends MusicBeatSubstate
 			printSpaceToTrace();
             printToTrace(getLogger());
 			if (isCritical)
-				printToTrace('REPORT TO GITHUB.COM/HRK-EXEX/H-SLICE');
+				printToTrace('REPORT TO GITHUB.COM/HRK-EXEX/A-SLICE');
 			else
 				printToTrace('');
 			if (isCritical)

@@ -547,25 +547,25 @@ class NotesColorSubState extends MusicBeatSubstate
 		}
 		else if (controls.RESET #if TOUCH_CONTROLS_ALLOWED || touchPad.buttonC.justPressed #end && hexTypeNum < 0)
 		{
-			if (FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER))
+		if (FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER))
+		{
+			for (i in 0...3)
 			{
-				for (i in 0...3)
+				var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
+				var color:FlxColor = !onPixel ? ClientPrefs.defaultData.arrowRGBExtra[curSelectedNote][i] : ClientPrefs.defaultData.arrowRGBPixelExtra[curSelectedNote][i];
+				switch (i)
 				{
-					var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
-					var color:FlxColor = !onPixel ? ClientPrefs.defaultData.arrowRGB[curSelectedNote][i] : ClientPrefs.defaultData.arrowRGBPixel[curSelectedNote][i];
-					switch (i)
-					{
-						case 0:
-							getShader().r = strumRGB.r = color;
-						case 1:
-							getShader().g = strumRGB.g = color;
-						case 2:
-							getShader().b = strumRGB.b = color;
-					}
-					dataArray[curSelectedNote][i] = color;
+					case 0:
+						getShader().r = strumRGB.r = color;
+					case 1:
+						getShader().g = strumRGB.g = color;
+					case 2:
+						getShader().b = strumRGB.b = color;
 				}
+				dataArray[curSelectedNote][i] = color;
 			}
-			setShaderColor(!onPixel ? ClientPrefs.defaultData.arrowRGB[curSelectedNote][curSelectedMode] : ClientPrefs.defaultData.arrowRGBPixel[curSelectedNote][curSelectedMode]);
+		}
+		setShaderColor(!onPixel ? ClientPrefs.defaultData.arrowRGBExtra[curSelectedNote][curSelectedMode] : ClientPrefs.defaultData.arrowRGBPixelExtra[curSelectedNote][curSelectedMode]);
 			FlxG.sound.play(Paths.sound('cancelMenu'), 0.6);
 			updateColors();
 		}
@@ -664,7 +664,8 @@ class NotesColorSubState extends MusicBeatSubstate
 
 	public function spawnNotes()
 	{
-		dataArray = !onPixel ? ClientPrefs.data.arrowRGB : ClientPrefs.data.arrowRGBPixel;
+		var sourceArray = !onPixel ? ClientPrefs.data.arrowRGBExtra : ClientPrefs.data.arrowRGBPixelExtra;
+		dataArray = sourceArray.slice(0, Main.mania + 1);
 		if (onPixel)
 			PlayState.stageUI = "pixel";
 
@@ -743,7 +744,7 @@ class NotesColorSubState extends MusicBeatSubstate
 		bigNote.centerOrigin();
 		bigNote.rgbShader.parent = Note.globalRgbShaders[curSelectedNote];
 		bigNote.shader = Note.globalRgbShaders[curSelectedNote].shader;
-		for (i in 0...Note.colArray.length)
+		for (i in 0...Main.mania + 1)
 		{
 			if (!onPixel)
 				bigNote.animation.addByPrefix('note$i', Note.colArray[i] + '0', 24, true);

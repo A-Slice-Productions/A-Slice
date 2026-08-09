@@ -272,8 +272,15 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('World Record Mode',
-			"If checked, any options which get rid of consistency are disabled,\nlike note density value, and compressed spam.\nIt's also useful to enjoy the original 'H-Slice'.",
+			"If checked, any options which get rid of consistency are disabled,\nlike note density value, and compressed spam.\nIt's also useful to enjoy the original 'A-Slice'.",
 			'worldRecordMode',
+			'bool');
+		option.onChange = onChangeFPSCounterWidth;
+		addOption(option);
+
+		var option:Option = new Option('WR Mode Fixed',
+			"Separate WR Mode where events/scripts increasing combo counters are disabled,\nand the FPS transparency box autosizes. FPS text displays WR Mode Fixed.",
+			'worldRecordModeFixed',
 			'bool');
 		option.onChange = onChangeFPSCounterWidth;
 		addOption(option);

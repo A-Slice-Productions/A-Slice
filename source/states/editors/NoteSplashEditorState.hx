@@ -79,10 +79,10 @@ class NoteSplashEditorState extends MusicBeatState
         tipText.setPosition(properUI.x - properUI.width - 60, UI.y);
         add(tipText);
 
-        for (i in 0...4)
+        for (i in 0...(Main.mania + 1))
         {
-            var babyArrow:StrumNote = new StrumNote(-273, 50, i % 4, 1);
-            babyArrow.playerPosition();
+            var babyArrow:StrumNote = new StrumNote(-273, 50, i % (Main.mania + 1), 1);
+            babyArrow.postAddedToGroup();
             babyArrow.screenCenter(Y);
             babyArrow.ID = i;
             strums.add(babyArrow);
@@ -674,7 +674,7 @@ class NoteSplashEditorState extends MusicBeatState
 
                         while (true)
                         {
-                            var data:Int = strum.ID % 4 + (datas * 4); 
+                            var data:Int = strum.ID % Note.colArray.length + (datas * Note.colArray.length); 
                             if (!splash.noteDataMap.exists(data) || !splash.animation.exists(splash.noteDataMap[data]))
                                 break;
 
@@ -686,13 +686,13 @@ class NoteSplashEditorState extends MusicBeatState
                         {
                             for (i in 0...anims)
                             {
-                                animArray.push(strum.ID % 4 + (i * 4));
+                                animArray.push(strum.ID % Note.colArray.length + (i * Note.colArray.length));
                             }
                         }
 
-                        var int:Int = strum.ID % 4;
-                        if (!splash.noteDataMap.exists(int) && splash.noteDataMap.exists(strum.ID % 4 + 4))
-                            int = strum.ID % 4 + 4;
+                        var int:Int = strum.ID % Note.colArray.length;
+                        if (!splash.noteDataMap.exists(int) && splash.noteDataMap.exists(strum.ID % Note.colArray.length + Note.colArray.length))
+                            int = strum.ID % Note.colArray.length + Note.colArray.length;
 
                         if (animArray.length > 1)
                         {
@@ -734,7 +734,7 @@ class NoteSplashEditorState extends MusicBeatState
 
         if (name != null && splash.animation.exists(name) && noteData > -1)
         {
-            splash.babyArrow = strums.members[noteData % 4];
+            splash.babyArrow = strums.members[noteData % strums.length];
             splash.spawnSplashNote(null, noteData, false);
             splash.alpha = 1;
             splashes.add(splash);
@@ -1036,15 +1036,15 @@ class NoteSplashEditorState extends MusicBeatState
 			config = NoteSplash.addAnimationToConfig(config, 1, Note.colArray[i], '$animation ${Note.colArray[i]} 10', fps, offset, [], i);
 		}
 
-		if (offsets.length > 4)
+		if (offsets.length > Note.colArray.length)
 		{
 			for (i in 0...Note.colArray.length)
 			{
-				var offset = offsets[i + 4];
+				var offset = offsets[i + Note.colArray.length];
 				if (i + 1 > offsets.length)
 					break;
 
-				config = NoteSplash.addAnimationToConfig(config, 1, Note.colArray[i] + "2", '$animation ${Note.colArray[i]} 20', fps, offset, [], i + 4);
+				config = NoteSplash.addAnimationToConfig(config, 1, Note.colArray[i] + "2", '$animation ${Note.colArray[i]} 20', fps, offset, [], i + Note.colArray.length);
 			}
 		}
 

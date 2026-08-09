@@ -49,6 +49,7 @@ class Main extends Sprite
 	// hi
 	public static var fpsBg:FPSBg;
 	public static var fpsVar:FPSCounter;
+	public static var mania:Int = 3;
 
 	public static final platform:String = #if mobile "Phones" #else "PCs" #end;
 

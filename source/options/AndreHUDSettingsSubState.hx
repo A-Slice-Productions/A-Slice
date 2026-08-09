@@ -19,6 +19,12 @@ class AndreHUDSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
+		var option:Option = new Option('Use Andre HUD (Lua Port)',
+			"If checked, uses the built-in port of andreshud.lua.\nNo Lua script needed, runs inside PlayState.\nNPS and combo counters use the A-Slice density-aware logic.",
+			'useAndreHUDLua',
+			BOOL);
+		addOption(option);
+
 		var option:Option = new Option('Ghost Density (Andre HUD)',
 			"If checked, counts note density for Andre HUD's real note counter.\nWorks with 'Overlapped Density' option in Gameplay settings.\nApplies to both AndreJr HUD and Andre New HUD.",
 			'andreGhostDensity',

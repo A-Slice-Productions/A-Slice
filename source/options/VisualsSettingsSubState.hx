@@ -35,9 +35,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		// for note skins and splash skins
 		notes = new FlxTypedGroup<StrumNote>();
 		splashes = new FlxTypedGroup<NoteSplash>();
-		for (i in 0...Note.colArray.length)
+		for (i in 0...Main.mania + 1)
 		{
-			var note:StrumNote = new StrumNote(370 + (560 / Note.colArray.length) * i, -200, i, 0);
+			var note:StrumNote = new StrumNote(370 + (560 / (Main.mania + 1)) * i, -200, i, 0);
 			changeNoteSkin(note);
 			notes.add(note);
 			
@@ -52,8 +52,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			splashes.add(splash);
 			
 			if (splash.rgbShader.enabled) {
-				Note.initializeGlobalRGBShader(i % Note.colArray.length);
-				splash.rgbShader.copyValues(Note.globalRgbShaders[i % Note.colArray.length]);
+				Note.initializeGlobalRGBShader(i);
+				splash.rgbShader.copyValues(Note.globalRgbShaders[i]);
 			}
 		}
 

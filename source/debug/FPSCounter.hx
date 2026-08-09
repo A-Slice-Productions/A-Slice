@@ -7,6 +7,7 @@ import cpp.vm.Gc;
 import flixel.FlxG;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import openfl.filters.GlowFilter; // Added GlowFilter import
 import lime.system.System as LimeSystem;
 
 #if flash
@@ -85,6 +86,11 @@ class FPSCounter extends TextField
 		fps = ClientPrefs.data.framerate;
 		updateRate = ClientPrefs.data.fpsRate;
 
+		// --- UI STROKE / OUTLINE EFFECT ---
+		// Parameters: (color, alpha, blurX, blurY, strength, quality)
+		// Adjust blurX/blurY for stroke thickness, strength for solidness.
+		this.filters = [new GlowFilter(0x000000, 1.0, 2, 2, 6, 1)];
+
 		cacheCount = 0;
 		times = [];
 		
@@ -110,19 +116,15 @@ class FPSCounter extends TextField
 		if (sliceCnt > 0) times.splice(0, sliceCnt);
 
 		avg = times.length > 0 ? 1000 / (sum / times.length) : 0.0;
-		// trace(times.length, avg);
 
-		// prevents the overlay from updating every frame, why would you need to anyways @crowplexus
 		deltaTimeout += deltaTime;
 		if (deltaTimeout < 1000 / updateRate) return;
 		
-		// Literally the stupidest thing i've done for the FPS counter but it allows it to update correctly when on 60 FPS??
 		currentFPS = Math.round(avg);
 		updateText(Math.round(1000 / deltaTime));
 		deltaTimeout = 0.0;
 	}
 
-	// so people can override it in hscript
 	var fpsStr:String = "";
 	
 	var realFPS:String = '';
@@ -138,7 +140,10 @@ class FPSCounter extends TextField
 			fpsStr = 'FPS:$realFPS |$avgFPS${MemoryUtil.isGcEnabled ? '' : " / No GC"}';
 		}
 
-		fpsStr += '${ClientPrefs.data.worldRecordMode ? " / WR Mode" : ""}\n';
+		if (ClientPrefs.data.worldRecordModeFixed)
+			fpsStr += ' / WR Mode Fixed\n';
+		else
+			fpsStr += '${ClientPrefs.data.worldRecordMode ? " / WR Mode" : ""}\n';
 		
 		if (ClientPrefs.data.showMemory) {
 			fpsStr += 'RAM: ${CoolUtil.formatBytes(Memory.getCurrentUsage(), 1, true)} / ${CoolUtil.formatBytes(Gc.memInfo64(Gc.MEM_INFO_USAGE), 1, true)}';
@@ -149,6 +154,7 @@ class FPSCounter extends TextField
 		if (ClientPrefs.data.showOS) fpsStr += os;
 
 		text = fpsStr;
+		if (Main.fpsBg != null) Main.fpsBg.updateSize();
 
 		if (!ClientPrefs.data.ffmpegMode)
 		{
@@ -160,9 +166,6 @@ class FPSCounter extends TextField
 		} else {
 			textColor = 0xFFFFFFFF;
 		}
-
-		// fpsTextLength = text.length;
-		// cacheCount = times.length;
 	}
 
 	public inline function positionFPS(X:Float, Y:Float, isWide:Bool = false, ?scale:Float = 1){
@@ -206,7 +209,7 @@ class FPSCounter extends TextField
 	#elseif (ios || mac)
 	@:functionCode('
 		const NXArchInfo *archInfo = NXGetLocalArchInfo();
-    	return ::String(archInfo == NULL ? "Unknown" : archInfo->name);
+		return ::String(archInfo == NULL ? "Unknown" : archInfo->name);
 	')
 	#else
 	@:functionCode('

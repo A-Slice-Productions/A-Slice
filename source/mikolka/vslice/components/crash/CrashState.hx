@@ -51,7 +51,7 @@ class CrashState extends FlxState
 		var star = #if CHECK_FOR_UPDATES "" #else "*" #end;
 		dateNow = dateNow.replace(' ', '_');
 		dateNow = dateNow.replace(':', "'");
-		errMsg += 'H-Slice+JS ${MainMenuState.hrkVersion}$star\n';
+		errMsg += 'A-Slice v${MainMenuState.hrkVersion}$star\n';
 		errMsg += '\nUncaught Error: ' + error.message + "\n";
 		for (x in error.extendedTrace)
 		{
@@ -67,7 +67,7 @@ class CrashState extends FlxState
 		@:privateAccess // lazy
 		backend.CrashHandler.saveErrorMessage(errMsg + '\n');
 		#else
-		var path = './crash/' + 'HSlice_' + dateNow + '.txt';
+		var path = './crash/' + 'A-Slice_' + dateNow + '.txt';
 		File.saveContent(path, errMsg + '\n');
 		#end
 		Sys.println(errMsg);

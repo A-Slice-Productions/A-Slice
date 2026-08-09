@@ -5,6 +5,7 @@ import Type.ValueType;
 import haxe.Constraints;
 
 import substates.GameOverSubstate;
+import backend.ClientPrefs;
 
 //
 // Functions that use a high amount of Reflections, which are somewhat CPU intensive
@@ -24,6 +25,9 @@ class ReflectionFunctions
 			return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
 		});
 		Lua_helper.add_callback(lua, "setProperty", function(variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
+			// WR Mode Fixed: block scripts from increasing the combo counter
+			if (ClientPrefs.data.worldRecordModeFixed && variable == 'combo' && LuaUtils.getTargetInstance() == PlayState.instance)
+				return value;
 			var split:Array<String> = variable.split('.');
 			if(split.length > 1) {
 				LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length-1], allowInstances ? parseInstances(value) : value, allowMaps);

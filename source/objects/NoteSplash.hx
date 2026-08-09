@@ -91,7 +91,7 @@ class NoteSplash extends FlxSprite
 			this.config = configs.get(path);
 			for (anim in this.config.animations)
 			{
-				if (anim.noteData % 4 == 0)
+				if (anim.noteData % Note.colArray.length == 0)
 					maxAnims++;
 			}
 			return;
@@ -113,7 +113,7 @@ class NoteSplash extends FlxSprite
 				{
 					var anim:NoteSplashAnim = Reflect.field(config.animations, i);
 					tempConfig.animations.set(i, anim);
-					if (anim.noteData % 4 == 0)
+					if (anim.noteData % Note.colArray.length == 0)
 						maxAnims++;
 				}
 
@@ -248,28 +248,29 @@ class NoteSplash extends FlxSprite
 				note.visible = false;
 			}
 
-			Note.initializeGlobalRGBShader(noteData % Note.colArray.length);
-			function useDefault()
-			{
-				tempShader = Note.globalRgbShaders[noteData % Note.colArray.length];
-			}
+		Note.initializeGlobalRGBShader(noteData);
+		function useDefault()
+		{
+			tempShader = Note.globalRgbShaders[noteData];
+		}
 
-			if(((cast FlxG.state) is NoteSplashEditorState) || 
-				((note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB)))
+		if(((cast FlxG.state) is NoteSplashEditorState) || 
+			((note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB)))
+		{
+			// If Note RGB is enabled:
+			if((!note.noteSplashData.useGlobalShader || ((cast FlxG.state) is NoteSplashEditorState)))
 			{
-				// If Note RGB is enabled:
-				if((!note.noteSplashData.useGlobalShader || ((cast FlxG.state) is NoteSplashEditorState)))
+				var colors = config.rgb;
+				if (colors != null)
 				{
-					var colors = config.rgb;
-					if (colors != null)
+					tempShader = new RGBPalette();
+					for (i in 0...colors.length)
 					{
-						tempShader = new RGBPalette();
-						for (i in 0...colors.length)
-						{
-							if (i > 2) break;
+						if (i > 2) break;
 
-							var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData % Note.colArray.length];
-							if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
+						var safeIndex:Int = Std.int(FlxMath.bound(noteData, 0, Main.mania));
+						var arr:Array<FlxColor> = ClientPrefs.data.arrowRGBExtra[Note.gfxIndex[Main.mania][safeIndex]];
+						if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixelExtra[Note.gfxIndex[Main.mania][safeIndex]];
 
 							var rgb = colors[i];
 							if (rgb == null)

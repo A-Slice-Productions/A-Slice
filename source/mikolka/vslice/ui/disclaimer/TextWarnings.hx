@@ -12,7 +12,7 @@ class OutdatedState extends WarningState
 		var guh:StringBuf = new StringBuf();
 
 		guh.add('Sup $bro, looks like you\'re running an\n');
-		guh.add('outdated version of H-Slice Engine (${MainMenuState.hrkVersion}),\n');
+		guh.add('outdated version of A-Slice Engine (${MainMenuState.hrkVersion}),\n');
 		guh.add('please update to $newVersion!\n');
 		guh.add('Press $escape to proceed anyway.\n\n');
 		guh.add('Thank you for using the Engine!\n');

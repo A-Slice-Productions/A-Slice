@@ -57,6 +57,20 @@
       "color": "0xFF0000"
     },
     {
+      "button": "buttonN",
+      "graphic": "n",
+      "x": 1280,
+      "y": 472,
+      "color": "0x888888"
+    },
+    {
+      "button": "buttonM",
+      "graphic": "m",
+      "x": 1280,
+      "y": 596,
+      "color": "0x888888"
+    },
+    {
       "button": "buttonUp2",
       "graphic": "up",
       "x": 660,

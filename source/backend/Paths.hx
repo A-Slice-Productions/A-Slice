@@ -149,7 +149,7 @@ class Paths
 
 		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
 		spr.animation.addByPrefix('purpleholdend', 'pruple end hold'); // this fixes some retarded typo from the original note .FLA
-		for (d in 0...4)
+		for (d in 0...26)
 		{
 			spr.animation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
 			spr.animation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');

@@ -41,12 +41,12 @@ class CreditsState extends MusicBeatState
 		#end
 
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
-			['H-Slice + JS Engine Team'],
-			['HRK.EXEX',			'hrk',				'Main Developer and Founder of H-Slice + JS Engine',				'https://www.youtube.com/@hk.3x3x2nd3',		'1890ff'],
-			['Jordan Santiago',			'jor',				'Co-Developer of H-Slice + JS Engine',				'https://www.youtube.com/@JordanSantiago',		'1890ff'],
+			['A-Slice Engine Team'],
+			['HRK.EXEX',			'hrk',				'Main Developer and Founder of A-Slice Engine',				'https://www.youtube.com/@hk.3x3x2nd3',		'1890ff'],
+			['Jordan Santiago',			'jor',				'Co-Developer of A-Slice Engine',				'https://www.youtube.com/@JordanSantiago',		'1890ff'],
 			['justAMZ',				'amz',				'Co-Developer mainly for Chart Editor, and Localizer on some UIs',						'https://youtube.com/@justamz',				'408080'],
-			['mcagabe19',			'lily',             'Porter of H-slice for mobile devices and creator of linc_luajit-rewritten (used for mobile builds)',   'https://youtube.com/@mcagabe19',		'FFE7C0'],
-			["H-Slice Discord"],
+			['mcagabe19',			'lily',             'Porter of A-Slice for mobile devices and creator of linc_luajit-rewritten (used for mobile builds)',   'https://youtube.com/@mcagabe19',		'FFE7C0'],
+			["A-Slice Discord"],
 			["Join our community",	"hrk", "", "https://discord.gg/SzXbVkqmG9",	"1890ff"],
 			[""],
 			['P-Slice Engine Team'],
