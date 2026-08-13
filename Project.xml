@@ -4,20 +4,14 @@ xmlns="http://lime.openfl.org/project/1.0.4"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
 	<!-- _________________________ Application Settings _________________________ -->
-<<<<<<< HEAD
 	<app unless="PROFILE_BUILD || mobile" title="Friday Night Funkin': A-Slice Engine" file="A-Slice" packageName="com.hrek.hexex.aslice" package="com.hrek.hexex.aslice" main="Main" version="0.0.3" company="hrek-hexex" />
 	<app if="PROFILE_BUILD" title="A-Slice Engine Profiling build" file="A-Slice" packageName="com.hrek.hexex.testAslice" package="com.hrek.hexex.testAslice" main="Main" version="0.0.3"  company="hrek-hexex" />
 	<app if="mobile" unless="PROFILE_BUILD" title="A-Slice Engine" file="A-Slice" packageName="com.hrek.hexex.aslice" package="com.hrek.hexex.aslice" main="Main" version="0.0.3"  company="hrek-hexex" />
-=======
-	<app unless="PROFILE_BUILD || mobile" title="Friday Night Funkin': A-Slice Engine" file="A-Slice" packageName="com.andrhevn23.aslice" package="com.andrhevn23.aslice" main="Main" version="0.0.2" company="andrehevn23" />
-	<app if="PROFILE_BUILD" title="A-Slice Engine Profiling build" file="A-Slice" packageName="com.andrhevn23.testAslice" package="com.andrhevn23.testAslice" main="Main" version="0.0.2" company="andrehevn23" />
-	<app if="mobile" unless="PROFILE_BUILD" title="A-Slice Engine" file="A-Slice" packageName="com.andrhevn23.aslice" package="com.andrhevn23.aslice" main="Main" version="0.0.2" company="andrehevn23" />
->>>>>>> 93ef4c3a2d3b6301509d1e3dce4e62ba9e1718ba
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
 	<meta build-number="331"/>
-	<config type="android" gradle-version="8.10.2" gradle-plugin="8.8.0" ndkVersion="27.0" minimum-sdk-version="26" target-sdk-version="35" />
+	<config type="android" gradle-version="8.10.2" gradle-plugin="8.8.0" ndkVersion="27.0"  minimum-sdk-version="26" target-sdk-version="35" />
 
 	<!-- NOTE TO SELF: DISABLE THIS IF ISSUES ARE FOUND -->
 	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB"/> <!-- stable luas PUT AFTER FIRST LINE WITH APP NAME AND ETC -->
