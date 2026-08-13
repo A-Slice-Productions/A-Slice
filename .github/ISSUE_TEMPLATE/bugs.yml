@@ -31,8 +31,8 @@ body:
   - type: input
     id: hslice-version
     attributes:
-      label: "In which version of H-Slice this occurs in (if it's the build from the Actions tab, then also include the commit hash of the build)"
-      placeholder: "0.2.4"
+      label: "In which version of A-Slice this occurs in (if it's the build from the Actions tab, then also include the commit hash of the build)"
+      placeholder: "0.0.2"
     validations:
       required: true
 
