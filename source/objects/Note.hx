@@ -150,17 +150,199 @@ class Note extends FlxSprite
 	public static var pixelWidth:Vector<Int> = new Vector(2, 0);
 	public static var pixelHeight:Vector<Int> = new Vector(2, 0);
 
-	// Mania arrays (1K - 26K)
-	public static var colArray:Array<String> = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+	// Mania arrays (1K - 105K)
+	public static var colArray:Array<String> = [
+		'A',
+		'B',
+		'C',
+		'D',
+		'E',
+		'F',
+		'G',
+		'H',
+		'I',
+		'J',
+		'K',
+		'L',
+		'M',
+		'N',
+		'O',
+		'P',
+		'Q',
+		'R',
+		'S',
+		'T',
+		'U',
+		'V',
+		'W',
+		'X',
+		'Y',
+		'Z',
+		'AA',
+		'AB',
+		'AC',
+		'AD',
+		'AE',
+		'AF',
+		'AG',
+		'AH',
+		'AI',
+		'AJ',
+		'AK',
+		'AL',
+		'AM',
+		'AN',
+		'AO',
+		'AP',
+		'AQ',
+		'AR',
+		'AS',
+		'AT',
+		'AU',
+		'AV',
+		'AW',
+		'AX',
+		'AY',
+		'AZ',
+		'BA',
+		'BB',
+		'BC',
+		'BD',
+		'BE',
+		'BF',
+		'BG',
+		'BH',
+		'BI',
+		'BJ',
+		'BK',
+		'BL',
+		'BM',
+		'BN',
+		'BO',
+		'BP',
+		'BQ',
+		'BR',
+		'BS',
+		'BT',
+		'BU',
+		'BV',
+		'BW',
+		'BX',
+		'BY',
+		'BZ',
+		'CA',
+		'CB',
+		'CC',
+		'CD',
+		'CE',
+		'CF',
+		'CG',
+		'CH',
+		'CI',
+		'CJ',
+		'CK',
+		'CL',
+		'CM',
+		'CN',
+		'CO',
+		'CP',
+		'CQ',
+		'CR',
+		'CS',
+		'CT',
+		'CU',
+		'CV',
+		'CW',
+		'CX',
+		'CY',
+		'CZ',
+		'DA'
+	];
 	public static var colArrayAlt:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'dark', 'pink', 'orange', 'cyan', 'magenta', 'lime', 'indigo', 'maroon', 'navy', 'teal', 'coral', 'gold', 'silver', 'crimson', 'olive', 'turquoise', 'plum', 'sienna'];
 	public static var pressArrayAlt:Array<String> = ['left', 'down', 'up', 'right', 'white', 'yellow', 'violet', 'black', 'dark', 'left', 'down', 'up', 'right', 'white', 'yellow', 'violet', 'black', 'dark', 'left', 'down', 'up', 'right', 'white', 'yellow', 'violet', 'black'];
 
-	public static var scales:Array<Float> = [0.7, 0.7, 0.7, 0.7, 0.65, 0.6, 0.55, 0.5, 0.46, 0.42, 0.38, 0.35, 0.32, 0.30, 0.28, 0.26, 0.24, 0.22, 0.21, 0.20, 0.19, 0.18, 0.17, 0.16, 0.15, 0.14];
-	public static var scalesPixel:Array<Float> = [1, 1, 1, 1, 0.93, 0.86, 0.79, 0.71, 0.66, 0.61, 0.56, 0.52, 0.48, 0.44, 0.41, 0.38, 0.35, 0.33, 0.31, 0.29, 0.27, 0.25, 0.24, 0.23, 0.22, 0.21];
-	public static var splashOffsetScale:Array<Float> = [1, 1, 1, 1, 1.08, 1.17, 1.27, 1.4, 1.52, 1.64, 1.77, 1.91, 2.06, 2.22, 2.40, 2.59, 2.80, 3.02, 3.26, 3.52, 3.80, 4.10, 4.43, 4.78, 5.16, 5.57];
-	public static var swidths:Array<Float> = [112, 112, 112, 112, 98, 84, 77, 70, 63, 57, 52, 48, 44, 40, 37, 34, 32, 30, 28, 26, 25, 24, 23, 22, 21, 20];
-	public static var posRest:Array<Int> = [-168, -112, -56, 0, 15, 35, 45, 55, 60, 65, 70, 75, 78, 81, 84, 87, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108];
-	public static var midArray:Array<Int> = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12];
+	public static var scales:Array<Float> = [0.70, 0.70, 0.70, 0.70, 0.65, 0.60, 0.55, 0.50, 0.46, 0.42, 0.38, 0.35, 0.32, 0.30, 0.28, 0.26, 0.24, 0.22, 0.21, 0.20, 0.19, 0.18, 0.17, 0.16, 0.15, 0.14, 0.14, 0.13, 0.12, 0.12, 0.11, 0.11, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10];
+	public static var scalesPixel:Array<Float> = [1.00, 1.00, 1.00, 1.00, 0.93, 0.86, 0.79, 0.71, 0.66, 0.61, 0.56, 0.52, 0.48, 0.44, 0.41, 0.38, 0.35, 0.33, 0.31, 0.29, 0.27, 0.25, 0.24, 0.23, 0.22, 0.21, 0.20, 0.20, 0.19, 0.19, 0.18, 0.18, 0.17, 0.17, 0.16, 0.16, 0.15, 0.15, 0.14, 0.14, 0.13, 0.13, 0.12, 0.12, 0.11, 0.11, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10];
+	public static var splashOffsetScale:Array<Float> = [1, 1, 1, 1, 1.08, 1.17, 1.27, 1.4, 1.52, 1.64, 1.77, 1.91, 2.06, 2.22, 2.40, 2.59, 2.80, 3.02, 3.26, 3.52, 3.80, 4.10, 4.43, 4.78, 5.16, 5.57, 6.00, 6.48, 6.99, 7.55, 8.13, 8.75, 9.41, 10.12, 10.87, 11.67, 12.52, 13.42, 14.37, 15.38, 16.45, 17.58, 18.77, 20.03, 21.35, 22.74, 24.20, 25.73, 27.34, 29.03, 30.80, 32.65, 34.59, 36.62, 38.74, 40.96, 43.28, 45.70, 48.23, 50.87, 53.63, 56.51, 59.51, 62.64, 65.90, 69.30, 72.84, 76.52, 80.35, 84.33, 88.46, 92.75, 97.20, 101.82, 106.61, 111.58, 116.72, 122.05, 127.56, 133.26, 139.15, 145.24, 151.53, 158.02, 164.72, 171.63, 178.76, 186.11, 193.68, 201.49, 209.53, 217.81, 226.34, 235.12, 244.16, 253.46, 263.03, 272.87, 283.00, 293.41, 304.11, 315.11, 326.41, 338.02, 350.00, 362.30, 374.91, 387.86, 401.15, 414.79, 428.80, 443.18, 457.94, 473.09, 488.64, 504.60, 520.97, 537.77];
+	public static var swidths:Array<Float> = [112, 112, 112, 112, 98, 84, 77, 70, 63, 57, 52, 48, 44, 40, 37, 34, 32, 30, 28, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+	public static var posRest:Array<Int> = [-168, -112, -56, 0, 15, 35, 45, 55, 60, 65, 70, 75, 78, 81, 84, 87, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264, 266];
+	public static var midArray:Array<Int> = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26, 27, 27, 28, 28, 29, 29, 30, 30, 31, 31, 32, 32, 33, 33, 34, 34, 35, 35, 36, 36, 37, 37, 38, 38, 39, 39, 40, 40, 41, 41, 42, 42, 43, 43, 44, 44, 45, 45, 46, 46, 47, 47, 48, 48, 49, 49, 50, 50, 51, 51, 52];
+	// Highest valid mania index. gfxIndex only contains literal entries for
+	// manias 0..25 (26 lanes); manias 26..MAX_MANIA are generated on demand by
+	// ensureHighManiaGfx(). Values above this make gfxIndex[mania] return null
+	// and crash.
+	public static var MAX_MANIA:Int = 104;
+	public static function clampMania(v:Int):Int
+	{
+		ensureHighManiaGfx();
+		return Std.int(Math.max(0, Math.min(MAX_MANIA, v)));
+	}
+
+	static var highManiaGfxInit:Bool = false;
+
+	// Generates gfxIndex/gfxHud entries for manias 26..104. The existing custom
+	// layouts only cover manias 0..25; anything above 9K simply cycles through
+	// the 9 note columns (gfxIndex) and the 5 arrow directions (gfxHud).
+	public static function ensureHighManiaGfx():Void
+	{
+		if(highManiaGfxInit) return;
+		highManiaGfxInit = true;
+		for(mania in 26...(MAX_MANIA + 1))
+		{
+			var gfx:Array<Int> = [];
+			var hud:Array<Int> = [];
+			for(lane in 0...(mania + 1))
+			{
+				gfx.push(lane % 9);
+				hud.push(lane % 5);
+			}
+			gfxIndex.push(gfx);
+			gfxHud.push(hud);
+		}
+	}
+
+	// Keybind name for a given mania lane, matching the engine's convention:
+	// 'note_1' for 1K, 'note_left/down/up/right' for 4K, and 'note_{mania+1}{suffix}'
+	// elsewhere where suffix is base-26 (a-z, aa, ab, ...).
+	public static function getManiaBindName(mania:Int, lane:Int):String
+	{
+		if(mania == 0) return 'note_1';
+		if(mania == 3) return ['note_left', 'note_down', 'note_up', 'note_right'][lane];
+		return 'note_' + (mania + 1) + getBindSuffix(lane);
+	}
+
+	public static function getBindSuffix(lane:Int):String
+	{
+		var suffix:String = '';
+		while(lane >= 0)
+		{
+			suffix = String.fromCharCode(97 + (lane % 26)) + suffix;
+			lane = Std.int(lane / 26) - 1;
+		}
+		return suffix;
+	}
+
+	static var cachedKeysArray:Array<Array<String>> = null;
+
+	// All keybind names for every mania 0..MAX_MANIA. Replaces the old hardcoded
+	// keysArray literals in PlayState/EditorPlayState so high manias (> 26 lanes)
+	// get a full set of bind names instead of being truncated at 26 lanes.
+	public static function getKeysArray():Array<Array<String>>
+	{
+		if(cachedKeysArray == null)
+		{
+			cachedKeysArray = [];
+			for(mania in 0...(MAX_MANIA + 1))
+			{
+				var keys:Array<String> = [];
+				for(lane in 0...(mania + 1))
+					keys.push(getManiaBindName(mania, lane));
+				cachedKeysArray.push(keys);
+			}
+		}
+		return cachedKeysArray;
+	}
+
 	public static var gfxIndex:Array<Dynamic> = [
 		[4],
 		[0, 3],
@@ -465,7 +647,16 @@ class Note extends FlxSprite
 
 	public static function initializeGlobalRGBShader(noteData:Int)
 	{
-		var dataNum = gfxIndex[Main.mania][noteData];
+		var maniaIndex:Int = Note.clampMania(Main.mania);
+		var maniaArr:Array<Dynamic> = gfxIndex[maniaIndex];
+		if (maniaArr == null || noteData < 0 || noteData >= maniaArr.length)
+		{
+			noteData = noteData < 0 ? 0 : (maniaArr != null ? noteData % maniaArr.length : 0);
+			if (maniaArr == null || noteData >= maniaArr.length) noteData = 0;
+		}
+		var dataNum:Int = 0;
+		if (maniaArr != null && noteData >= 0 && noteData < maniaArr.length)
+			dataNum = maniaArr[noteData];
 		if(globalRgbShaders[dataNum] == null)
 		{
 			var newRGB = new RGBPalette();
@@ -509,8 +700,14 @@ class Note extends FlxSprite
 		if(texture.length < 1)
 		{
 			rSkin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-			if(rSkin == null || rSkin.length < 1)
-				rSkin = DEFAULT_NOTE_SKIN + postfix;
+			if(rSkin == null || rSkin.length < 1) {
+				// When RGB shader is disabled, use classic noteskin which has pre-colored arrows built-in
+				if(rgbShader != null && !rgbShader.enabled) {
+					rSkin = 'noteskins/NOTE_assets-classic' + postfix;
+				} else {
+					rSkin = DEFAULT_NOTE_SKIN + postfix;
+				}
+			}
 		}
 		else rgbShader.enabled = false;
 
@@ -668,6 +865,8 @@ class Note extends FlxSprite
 	var angleRad:Float;
 	public function followStrumNote(songSpeed:Float = 1, distance:Float = 0)
 	{
+		if (strum == null) return;
+		
 		if (isSustainNote)
 		{
 			scale.set(scales[Main.mania], animation != null && animation.curAnim != null && animation.curAnim.name.endsWith('end') ? scales[Main.mania] : Conductor.stepCrochet * 0.0105 * songSpeed * sustainScale);

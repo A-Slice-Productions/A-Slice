@@ -18,6 +18,7 @@ class PsychUITab extends FlxSprite
 		@:bypassAccessor this.name = name;
 		text = new FlxText(0, 0, 100, name);
 		text.alignment = CENTER;
+		PsychUIEventHandler.applyTextStroke(text);
 	}
 
 	override function draw()

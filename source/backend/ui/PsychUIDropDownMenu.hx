@@ -284,6 +284,7 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 
 		text = new FlxText(0, 0, width, 8);
 		text.color = FlxColor.BLACK;
+		PsychUIEventHandler.applyTextStroke(text);
 		add(text);
 	}
 

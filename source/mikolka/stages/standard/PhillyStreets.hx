@@ -783,7 +783,7 @@ class PhillyStreets extends BaseStage
 		FlxTween.cancelTweensOf(picoFade.scale);
 		FlxTween.cancelTweensOf(picoFade);
 		FlxTween.tween(picoFade.scale, {x: 1.3, y: 1.3}, 0.4);
-		FlxTween.tween(picoFade, {alpha: 0}, 0.4, {onComplete: (_) -> (picoFade.visible = false)});
+		FlxTween.tween(picoFade, {alpha: 0}, 0.4, {onComplete: function(_) picoFade.visible = false});
 	}
 
 	public function darkenStageProps()

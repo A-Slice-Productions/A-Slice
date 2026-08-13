@@ -665,7 +665,8 @@ class NotesColorSubState extends MusicBeatSubstate
 	public function spawnNotes()
 	{
 		var sourceArray = !onPixel ? ClientPrefs.data.arrowRGBExtra : ClientPrefs.data.arrowRGBPixelExtra;
-		dataArray = sourceArray.slice(0, Main.mania + 1);
+		var keyCount:Int = Note.clampMania(Main.mania) + 1;
+		dataArray = sourceArray.slice(0, keyCount);
 		if (onPixel)
 			PlayState.stageUI = "pixel";
 
@@ -744,7 +745,7 @@ class NotesColorSubState extends MusicBeatSubstate
 		bigNote.centerOrigin();
 		bigNote.rgbShader.parent = Note.globalRgbShaders[curSelectedNote];
 		bigNote.shader = Note.globalRgbShaders[curSelectedNote].shader;
-		for (i in 0...Main.mania + 1)
+		for (i in 0...keyCount)
 		{
 			if (!onPixel)
 				bigNote.animation.addByPrefix('note$i', Note.colArray[i] + '0', 24, true);

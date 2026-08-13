@@ -1,5 +1,6 @@
 package mikolka.funkin.custom;
 
+import haxe.io.Bytes;
 import openfl.media.Sound;
 import openfl.display.BitmapData;
 #if (!NATIVE_LOOKUP && !OPENFL_LOOKUP)
@@ -312,11 +313,96 @@ class NativeFileSystem
 			if (foundNode == null) {
 				return null;
 			}
+
 			nextDir = nextDir+"/"+foundNode;
 		}
 
 		return nextDir;
 	}
+
+	public static function getBytes(path:String):Null<Bytes>
+	{
+		var isModded = path.startsWith("mods");
+		#if OPENFL_LOOKUP
+		if (!isModded)
+		{
+			var openfl_bytes = Assets.getBytes(path);
+			if (openfl_bytes != null)
+				return openfl_bytes;
+		}
+		#end
+
+		#if NATIVE_LOOKUP
+		#if OPENFL_LOOKUP
+		if (!isModded)
+			return null;
+		#end
+		var sys_path = getPathLike(path);
+		if (sys_path != null)
+		{
+			#if windows
+			var result = sys.io.File.getBytes(sys_path);
+			#else
+			var result = sys.io.File.getBytes(sys_path);
+			#end
+			return result;
+		}
+		#end
+		return null;
+	}
+
+	/**
+	 * Returns true if the file exists, either in the baked-in asset manifest
+	 * or on the real filesystem (also finds user-dropped files not in the manifest).
+	 */
+	public static function existsAnywhere(path:String):Bool
+	{
+		if (exists(path)) return true;
+		#if NATIVE_LOOKUP
+		return getPathLike(path) != null;
+		#else
+		return false;
+		#end
+	}
+
+	/**
+	 * Reads raw file bytes, falling back to the real filesystem when the path
+	 * isn't part of the baked-in asset manifest (e.g. user-dropped archives).
+	 * Never asks the asset manifest for unknown files: Assets.getBytes throws
+	 * for a missing non-embedded asset instead of returning null.
+	 */
+	public static function getBytesAnywhere(path:String):Null<Bytes>
+	{
+		if (exists(path))
+		{
+			try { return getBytes(path); } catch (e:Dynamic) {}
+		}
+		#if NATIVE_LOOKUP
+		var sysPath = getPathLike(path);
+		if (sysPath != null) return sys.io.File.getBytes(sysPath);
+		#end
+		return null;
+	}
+
+	/**
+	 * Reads text file content, falling back to the real filesystem when the path
+	 * isn't part of the baked-in asset manifest.
+	 */
+	public static function getContentAnywhere(path:String):Null<String>
+	{
+		var result = getContent(path);
+		if (result != null) return result;
+		#if NATIVE_LOOKUP
+		var sysPath = getPathLike(path);
+		if (sysPath != null)
+		{
+			var bytes = sys.io.File.getBytes(sysPath);
+			if (bytes != null) return bytes.toString();
+		}
+		#end
+		return null;
+	}
+	
 	/**
 	 * Searches a given directory and returns a name of the existing file/directory
 	 * *similar* to the **key**

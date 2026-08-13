@@ -17,6 +17,7 @@ class OptionsState extends MusicBeatState
 {
 	var options:Array<String> = [
 		'Note Colors',
+		'Note Skin Selector',
 		'Controls',
 		'Adjust Delay and Combo',
 		#if desktop 'Video Rendering', #end
@@ -50,6 +51,8 @@ class OptionsState extends MusicBeatState
 		{
 			case 'Note Colors':
 				openSubState(new options.NotesColorSubState());
+			case 'Note Skin Selector':
+				openSubState(new options.NoteSkinSelectorSubState());
 			case 'Controls':
 				if (controls.mobileC)
 				{

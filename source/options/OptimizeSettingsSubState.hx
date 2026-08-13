@@ -173,6 +173,36 @@ class OptimizeSettingsSubState extends BaseOptionsMenu
                         BOOL);
                 addOption(option);
 
+                var option:Option = new Option('Json Zip Reader',
+                        "If checked, the chart loader will look for compressed chart archives in the song folder and read the JSON from inside the archive.\nThis can significantly reduce disk space usage for large charts.\nSupported formats: .zip, .7z, .tar.xz, .tar.gz, .tar.zx\nSupports nested archives (e.g., .zip inside .7z).\nPlace compressed files like: song-name.json.zip",
+                        'jsonZipReader',
+                        BOOL);
+                addOption(option);
+
+                var option:Option = new Option('Uncapped FPS',
+                        "If checked, the game's framerate will be uncapped.\nThis can improve smoothness on high-refresh-rate displays.",
+                        'uncappedFPS',
+                        BOOL);
+                addOption(option);
+
+                var option:Option = new Option('Unlock FPS (Recording)',
+                        "If checked, unlocks the framerate for video recording.\nUsed by ffmpeg/replay recording.",
+                        'unlockFPS',
+                        BOOL);
+                addOption(option);
+
+                var option:Option = new Option('Botplay Optimization',
+                        "If checked, strips non-essential UI updates and calculations from the main thread during Botplay.\nReduces overhead during autoplay.",
+                        'botplayOptimize',
+                        BOOL);
+                addOption(option);
+
+                var option:Option = new Option('Smooth High Scroll-Speed',
+                        "If checked, smooths out low-end device lag spikes during high scroll speeds (2.5+) on sparse note sections.",
+                        'smoothHighScroll',
+                        BOOL);
+                addOption(option);
+
                 super();
         }
 

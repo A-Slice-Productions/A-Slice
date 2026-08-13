@@ -2,9 +2,6 @@ package objects;
 
 import haxe.Json;
 import openfl.utils.Assets;
-import openfl.filters.GlowFilter;
-import openfl.filters.BitmapFilterQuality;
-import mikolka.funkin.FlxFilteredSprite;
 
 enum Alignment
 {
@@ -32,9 +29,6 @@ class Alphabet extends FlxSpriteGroup
 
 	public var distancePerItem:FlxPoint = FlxPoint.get(20, 120);
 	public var startPosition:FlxPoint = FlxPoint.get(0, 0); //for the calculations
-
-	public var strokeColor:Null<Int> = 0xFF000000;
-	public var strokeSize:Float = 1;
 
 	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = true)
 	{
@@ -237,13 +231,13 @@ class Alphabet extends FlxSpriteGroup
 					}
 					consecutiveSpaces = 0;
 
-				letter = cast recycle(AlphaCharacter, true);
-				letter.scale.x = scaleX;
-				letter.scale.y = scaleY;
-				letter.rowWidth = 0;
+					letter = cast recycle(AlphaCharacter, true);
+					letter.scale.x = scaleX;
+					letter.scale.y = scaleY;
+					letter.rowWidth = 0;
 
-				letter.setupAlphaCharacter(xPos, rows * Y_PER_ROW * scale.y, character, bold, strokeColor, strokeSize);
-				@:privateAccess letter.parent = this;
+					letter.setupAlphaCharacter(xPos, rows * Y_PER_ROW * scale.y, character, bold);
+					@:privateAccess letter.parent = this;
 
 					letter.row = rows;
 					off = 0;
@@ -296,7 +290,7 @@ typedef Letter = {
 	?offsetsBold:Array<Float>
 }
 
-class AlphaCharacter extends FlxFilteredSprite
+class AlphaCharacter extends FlxSprite
 {
 	//public static var alphabet:String = "abcdefghijklmnopqrstuvwxyz";
 	//public static var numbers:String = "1234567890";
@@ -367,16 +361,10 @@ class AlphaCharacter extends FlxFilteredSprite
 	}
 	
 	public var curLetter:Letter = null;
-	public var strokeColor:Null<Int> = null;
-	public var strokeSize:Float = 1;
-	public function setupAlphaCharacter(x:Float, y:Float, ?character:String = null, ?bold:Null<Bool> = null, ?strokeColor:Null<Int> = null, ?strokeSize:Float = 1)
+	public function setupAlphaCharacter(x:Float, y:Float, ?character:String = null, ?bold:Null<Bool> = null)
 	{
 		this.x = x;
 		this.y = y;
-
-		this.strokeColor = strokeColor;
-		this.strokeSize = strokeSize;
-		filters = null;
 
 		if(parent != null)
 		{
@@ -422,13 +410,8 @@ class AlphaCharacter extends FlxFilteredSprite
 			{
 				if(postfix != ' bold') postfix = ' normal';
 				anim = 'question' + postfix;
-				animation.addByPrefix(anim, anim+" instance ", 24);
+				animation.addByPrefix(anim, anim, 24);
 				animation.play(anim, true);
-			}
-			updateHitbox();
-			if (strokeColor != null)
-			{
-				filters = [new GlowFilter(strokeColor, 1, strokeSize, strokeSize, 1, BitmapFilterQuality.LOW)];
 			}
 		}
 		updateHitbox();
@@ -512,7 +495,6 @@ class AlphaCharacter extends FlxFilteredSprite
 	}
 
 	override function destroy(){
-		filters = null;
 		active = false;
 		super.destroy();
 	}

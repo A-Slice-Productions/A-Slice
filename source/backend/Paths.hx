@@ -62,7 +62,9 @@ class Paths
 
 	//TODO make this more customisable
 	public static var dumpExclusions:Array<String> = [
-		'music/freakyMenu.$SOUND_EXT'
+		'music/freakyMenu.$SOUND_EXT',
+		'images/alphabet.png',
+		'images/checkboxanim.png'
 	];
 	// haya I love you for the base cache dump I took to the max
 	public static function clearUnusedMemory()
@@ -109,7 +111,7 @@ class Paths
 		// clear anything not in the tracked assets list
 		for (key in FlxG.bitmap._cache.keys())
 		{
-			if (!currentTrackedAssets.exists(key))
+			if (!currentTrackedAssets.exists(key) && !dumpExclusions.contains(key))
 				destroyGraphic(FlxG.bitmap.get(key));
 			
 		}

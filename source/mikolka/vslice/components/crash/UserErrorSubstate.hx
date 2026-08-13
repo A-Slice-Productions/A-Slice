@@ -232,7 +232,7 @@ class UserErrorSubstate extends MusicBeatSubstate
 			printSpaceToTrace();
             printToTrace(getLogger());
 			if (isCritical)
-				printToTrace('REPORT TO GITHUB.COM/HRK-EXEX/A-SLICE');
+				printToTrace('REPORT TO GITHUB.COM/A-SLICE-PRODUCTIONS/A-SLICE');
 			else
 				printToTrace('');
 			if (isCritical)

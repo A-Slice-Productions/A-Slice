@@ -40,6 +40,7 @@ class PsychUIButton extends FlxSpriteGroup
 
 		text = new FlxText(0, 0, 1, '');
 		text.alignment = CENTER;
+		PsychUIEventHandler.applyTextStroke(text);
 		add(text);
 		resize(wid, hei);
 		this.label = label;

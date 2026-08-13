@@ -88,6 +88,7 @@ class FlxFilteredSprite extends FlxSprite
     _filterMatrix = new FlxMatrix();
     filters = null;
     filtered = false;
+    _usingSharedFrame = false;
   }
 
   override public function draw():Void
@@ -145,7 +146,47 @@ class FlxFilteredSprite extends FlxSprite
       _matrix.ty = Math.floor(_matrix.ty);
     }
 
-    camera.drawPixels((filtered) ? _blankFrame : _frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
+    var drawPixels:BitmapData = framePixels;
+    if (filtered)
+    {
+        var src = _frame;
+        if (src != null && src.parent != null && src.parent.bitmap != null)
+            drawPixels = src.parent.bitmap;
+        else if (_blankFrame != null && _blankFrame.parent != null && _blankFrame.parent.bitmap != null)
+            drawPixels = _blankFrame.parent.bitmap;
+    }
+    camera.drawPixels(_frame, drawPixels, _matrix, colorTransform, blend, antialiasing, shader);
+  }
+
+  // Shared cache of baked filter results. Menus render hundreds of identical
+  // letters (same glyph + same outline filter), so baking each unique glyph
+  // only once instead of once per letter removes a big one-time stutter when
+  // a menu with lots of text opens.
+  static var _filteredFrames:Map<String, FlxFrame> = [];
+  static var _filterCacheSize:Int = 0;
+
+  // When true, _blankFrame.parent points at a graphic owned by _filteredFrames,
+  // so it must never be mutated or destroyed by this sprite.
+  @:noCompletion var _usingSharedFrame:Bool = false;
+
+  @:noCompletion
+  function getFilterCacheKey():String
+  {
+    var key = (frame.parent != null ? frame.parent.key : 'null') + '|'
+      + frame.frame.x + ',' + frame.frame.y + ',' + frame.frame.width + ',' + frame.frame.height + '|';
+
+    for (filter in filters)
+    {
+      key += Type.getClassName(Type.getClass(filter)) + '(';
+      for (field in Reflect.fields(filter))
+      {
+        var value:Dynamic = Reflect.field(filter, field);
+        if (value is Bool || value is Int || value is Float)
+          key += field + '=' + value + ';';
+      }
+      key += ')';
+    }
+    return key;
   }
 
   @:noCompletion
@@ -166,6 +207,30 @@ class FlxFilteredSprite extends FlxSprite
           filter.__topExtension
           + filter.__bottomExtension);
       }
+
+      var cacheKey:String = getFilterCacheKey();
+      var cached:FlxFrame = _filteredFrames.get(cacheKey);
+      if (cached != null && cached.parent != null && cached.parent.bitmap != null)
+      {
+        if (_blankFrame == null) _blankFrame = new FlxFrame(null);
+        cached.copyTo(_blankFrame);
+        _frame = _blankFrame;
+        _filterMatrix.translate(_flashRect.x, _flashRect.y);
+        _usingSharedFrame = true;
+        filtered = true;
+        return;
+      }
+
+      // If this sprite re-bakes with different filter params, _blankFrame.parent
+      // may still reference a cached (shared) graphic. Drop the reference
+      // without destroying it — the cache still owns it.
+      if (_blankFrame != null && _blankFrame.parent != null && _usingSharedFrame)
+      {
+        _blankFrame.parent = null;
+        _filterBmp1 = null;
+        _filterBmp2 = null;
+      }
+      _usingSharedFrame = false;
       _flashRect.width += frameWidth;
       _flashRect.height += frameHeight;
       if (_blankFrame == null) _blankFrame = new FlxFrame(null);
@@ -189,6 +254,12 @@ class FlxFilteredSprite extends FlxSprite
       _blankFrame.frame = FlxRect.get(0, 0, _blankFrame.parent.bitmap.width, _blankFrame.parent.bitmap.height);
       _filterMatrix.translate(_flashRect.x, _flashRect.y);
       _frame = _blankFrame.copyTo();
+      if (++_filterCacheSize > 1024) // safety cap against unbounded growth
+      {
+        _filteredFrames = [];
+        _filterCacheSize = 0;
+      }
+      _filteredFrames.set(cacheKey, _frame);
       filtered = true;
     }
     else

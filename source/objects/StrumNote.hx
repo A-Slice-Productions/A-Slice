@@ -35,8 +35,9 @@ class StrumNote extends FlxSprite
 		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
 		if(!ClientPrefs.data.noteShaders) useRGBShader = false;
 		
-		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGBExtra[Note.gfxIndex[Main.mania][leData]];
-		if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixelExtra[Note.gfxIndex[Main.mania][leData]];
+		var mania:Int = Note.clampMania(Main.mania);
+		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGBExtra[Note.gfxIndex[mania][leData]];
+		if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixelExtra[Note.gfxIndex[mania][leData]];
 		
 		if(leData <= Main.mania)
 		{
@@ -68,6 +69,7 @@ class StrumNote extends FlxSprite
 	{
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
+		var mania:Int = Note.clampMania(Main.mania);
 
 		if(PlayState.isPixelStage)
 		{
@@ -77,7 +79,7 @@ class StrumNote extends FlxSprite
 			loadGraphic(Paths.image('pixelUI/' + texture), true, Math.floor(width), Math.floor(height));
 
 			antialiasing = false;
-			setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.scalesPixel[Main.mania]));
+			setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.scalesPixel[mania]));
 
 			animation.add('purple', [9]);
 			animation.add('blue', [10]);
@@ -89,7 +91,7 @@ class StrumNote extends FlxSprite
 			animation.add('black', [16]);
 			animation.add('dark', [17]);
 
-			var dataNum = Note.gfxIndex[Main.mania][noteData];
+			var dataNum = Note.gfxIndex[mania][noteData];
 			animation.add('static', [dataNum]);
 			animation.add('pressed', [9 + dataNum, 18 + dataNum], 12, false);
 			animation.add('confirm', [27 + dataNum, 36 + dataNum], 24, false);
@@ -108,11 +110,11 @@ class StrumNote extends FlxSprite
 			animation.addByPrefix('dark', 'arrowRIGHT');
 
 			antialiasing = ClientPrefs.data.antialiasing;
-			setGraphicSize(Std.int(width * Note.scales[Main.mania]));
+			setGraphicSize(Std.int(width * Note.scales[mania]));
 
-			var dirName = Note.gfxDir[Note.gfxHud[Main.mania][noteData]];
-			var pressName = Note.colArray[Note.gfxIndex[Main.mania][noteData]];
-			var pressNameAlt = Note.pressArrayAlt[Note.gfxIndex[Main.mania][noteData]];
+			var dirName = Note.gfxDir[Note.gfxHud[mania][noteData]];
+			var pressName = Note.colArray[Note.gfxIndex[mania][noteData]];
+			var pressNameAlt = Note.pressArrayAlt[Note.gfxIndex[mania][noteData]];
 			animation.addByPrefix('static', 'arrow' + dirName);
 
 			var animFrames = [];

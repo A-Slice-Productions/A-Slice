@@ -2,6 +2,13 @@ package backend;
 
 import haxe.ds.Vector;
 import haxe.Json;
+import haxe.io.Bytes;
+import haxe.zip.Entry;
+import haxe.zip.Reader;
+import haxe.zip.Uncompress;
+import haxe.io.BytesInput;
+import sys.FileSystem;
+import sys.io.Process;
 import backend.SongJson;
 import lime.utils.Assets;
 
@@ -56,6 +63,30 @@ typedef SwagSection =
 
 class Song
 {
+	/**
+	 * Recursively deletes a directory and all its contents
+	 */
+	static function deleteDirectoryRecursive(path:String):Void
+	{
+		#if !web
+		if (!FileSystem.exists(path)) return;
+		
+		for (file in FileSystem.readDirectory(path))
+		{
+			var fullPath = '$path/$file';
+			if (FileSystem.isDirectory(fullPath))
+			{
+				deleteDirectoryRecursive(fullPath);
+			}
+			else
+			{
+				FileSystem.deleteFile(fullPath);
+			}
+		}
+		FileSystem.deleteDirectory(path);
+		#end
+	}
+
 	public var song:String;
 	public var notes:Array<SwagSection>;
 	public var events:Array<Array<Dynamic>>;
@@ -158,8 +189,46 @@ class Song
 		var formattedSong:String = Paths.formatToSongPath(jsonInput);
 		_lastPath = Paths.json('$formattedFolder/$formattedSong');
 
+		trace('[Song] Looking for chart at: $_lastPath');
+		trace('[Song] Formatted folder: $formattedFolder, song: $formattedSong');
+
 		if(NativeFileSystem.exists(_lastPath))
+		{
 			rawData = NativeFileSystem.getContent(_lastPath);
+			trace('[Song] Found raw JSON, length: ${rawData != null ? rawData.length : 0}');
+		}
+		else
+		{
+			trace('[Song] Raw JSON not found at $_lastPath');
+		}
+
+		// Json Zip Reader: try loading from compressed archive if enabled and raw JSON not found
+		if(rawData == null && ClientPrefs.data.jsonZipReader)
+		{
+			trace('[Song] jsonZipReader enabled, trying archives...');
+			var archiveExtensions:Array<String> = ['.zip', '.7z', '.tar.xz', '.tar.gz', '.tar.zx', '.tgz'];
+			// `_lastPath` points at `song.json`; also try the plain `song` archive name
+			// (e.g. both `tutorial.json.zip` and `tutorial.zip`).
+			var archiveBase:String = _lastPath;
+			if (archiveBase.endsWith('.json'))
+				archiveBase = archiveBase.substring(0, archiveBase.length - 5);
+			var archiveNames:Array<String> = [_lastPath, archiveBase];
+			for (name in archiveNames)
+			{
+				for (ext in archiveExtensions)
+				{
+					var archivePath:String = name + ext;
+					trace('[Song] Checking archive: $archivePath exists=${NativeFileSystem.existsAnywhere(archivePath)}');
+					if(NativeFileSystem.existsAnywhere(archivePath))
+					{
+						rawData = readJsonFromArchive(archivePath, formattedSong + '.json');
+						trace(rawData != null ? '[Song] readJsonFromArchive result: SUCCESS (${rawData.length} chars)' : '[Song] readJsonFromArchive result: FAILED');
+						if (rawData != null) break;
+					}
+				}
+				if (rawData != null) break;
+			}
+		}
 
 		if(rawData == null) return null;
 
@@ -185,9 +254,9 @@ class Song
 					partData = NativeFileSystem.getContent(pathPatternB);
 				}
 
-				if(partData != null) {
-					var partSong:SwagSong = parseJSON(partData, jsonInput);
-					if(partSong != null) {
+			if(partData != null) {
+				var partSong:SwagSong = parseJSON(partData, jsonInput, null);
+				if(partSong != null) {
 						if(partSong.notes != null) {
 							if(baseSong.notes == null) baseSong.notes = [];
 							baseSong.notes = baseSong.notes.concat(partSong.notes);
@@ -207,6 +276,293 @@ class Song
 
 
 		return baseSong;
+	}
+
+	/**
+	 * Reads a JSON file from a compressed archive.
+	 * Supports: .zip, .7z, .tar.xz, .tar.gz, .tar.zx, and nested archives.
+	 * @param archivePath Path to the archive file
+	 * @param fileName Name of the JSON file inside the archive
+	 * @return The decompressed JSON string, or null if not found
+	 */
+	static function readJsonFromArchive(archivePath:String, fileName:String):Null<String>
+	{
+		// Try native ZIP reading first
+		var result = readJsonFromZip(archivePath, fileName);
+		if (result != null) return result;
+
+		// Try system decompression tools for other formats
+		result = readJsonFromArchiveSystem(archivePath, fileName);
+		if (result != null) return result;
+
+		// Try nested archive extraction
+		return readJsonFromNestedArchive(archivePath, fileName);
+	}
+
+	/**
+	 * Native ZIP reading using haxe.zip
+	 */
+	static function readJsonFromZip(zipPath:String, fileName:String):Null<String>
+	{
+		trace('[Song] readJsonFromZip: path=$zipPath, file=$fileName');
+		var zipBytes:Bytes = NativeFileSystem.getBytesAnywhere(zipPath);
+		trace(zipBytes != null ? '[Song] getBytes result: ${zipBytes.length} bytes' : '[Song] getBytes result: null');
+		if (zipBytes == null) return null;
+
+		try
+		{
+			var input = new haxe.io.BytesInput(zipBytes);
+			var entries = Reader.readZip(input);
+			
+			for (entry in entries)
+			{
+				if (entry.fileName == fileName || entry.fileName.endsWith('/' + fileName))
+				{
+					// ZIP entries are raw DEFLATE (no zlib header), so we must inflate
+					// with a negative window size. Uncompress.run expects a zlib header
+					// and fails with "incorrect header check" on most real-world zips.
+					var data:Bytes = entry.compressed ? inflateRaw(entry.data) : entry.data;
+					return data.toString();
+				}
+			}
+
+			// No direct JSON match: accept a single *.json entry as a fallback
+			// (covers zips where the chart json is named differently).
+			var jsonFallback:String = null;
+			for (entry in entries)
+			{
+				if (entry.fileName.endsWith('.json'))
+				{
+					if (jsonFallback != null) { jsonFallback = null; break; }
+					jsonFallback = entry.fileName;
+				}
+			}
+			if (jsonFallback != null)
+			{
+				for (entry in entries)
+				{
+					if (entry.fileName == jsonFallback)
+					{
+						var data:Bytes = entry.compressed ? inflateRaw(entry.data) : entry.data;
+						return data.toString();
+					}
+				}
+			}
+
+			// No JSON found — the zip may contain nested archives (zip -> 7z -> tar.xz -> json).
+			return readNestedFromZipEntries(entries, zipPath, fileName);
+		}
+		catch (e:Dynamic)
+		{
+			trace('Failed to read JSON from zip: $zipPath - $e');
+		}
+		return null;
+	}
+
+	/**
+	 * Extracts archive entries from a zip to a temp dir and recursively reads
+	 * the target JSON from the nested archive (e.g. zip -> 7z -> tar.xz -> json).
+	 */
+	static function readNestedFromZipEntries(entries:List<Entry>, zipPath:String, fileName:String):Null<String>
+	{
+		#if !web
+		var tempDir:String = 'temp_zip_nested_' + Math.round(Math.random() * 10000);
+		FileSystem.createDirectory(tempDir);
+		try
+		{
+			for (entry in entries)
+			{
+				if (entry.fileName.endsWith('.zip') || entry.fileName.endsWith('.7z') || entry.fileName.endsWith('.tar.xz')
+					|| entry.fileName.endsWith('.tar.gz') || entry.fileName.endsWith('.tar.zx') || entry.fileName.endsWith('.tgz')
+					|| entry.fileName.endsWith('.tar'))
+				{
+					var data:Bytes = entry.compressed ? inflateRaw(entry.data) : entry.data;
+					var name:String = entry.fileName.split('/').pop();
+					var fullPath:String = '$tempDir/$name';
+					sys.io.File.saveBytes(fullPath, data);
+					var nestedResult = readJsonFromArchive(fullPath, fileName);
+					if (nestedResult != null)
+					{
+						deleteDirectoryRecursive(tempDir);
+						return nestedResult;
+					}
+				}
+			}
+		}
+		catch (e:Dynamic)
+		{
+			trace('Nested archives inside zip failed: $zipPath - $e');
+		}
+		try { deleteDirectoryRecursive(tempDir); } catch (e:Dynamic) {}
+		#end
+		return null;
+	}
+
+	/**
+	 * Inflates raw DEFLATE data (window bits -15, i.e. no zlib header),
+	 * as used by ZIP file entries.
+	 */
+	static function inflateRaw(data:Bytes):Bytes
+	{
+		#if cpp
+		var u = new Uncompress(-15);
+		var bufsize:Int = 1 << 16;
+		var tmp = Bytes.alloc(bufsize);
+		var buffer = new haxe.io.BytesBuffer();
+		var pos:Int = 0;
+		u.setFlushMode(haxe.zip.FlushMode.SYNC);
+		while (true)
+		{
+			var r = u.execute(data, pos, tmp, 0);
+			buffer.addBytes(tmp, 0, r.write);
+			pos += r.read;
+			if (r.done) break;
+		}
+		u.close();
+		return buffer.getBytes();
+		#else
+		return Uncompress.run(data);
+		#end
+	}
+
+	/**
+	 * Uses system commands (7z, tar) to extract from archives
+	 */
+	static function readJsonFromArchiveSystem(archivePath:String, fileName:String):Null<String>
+	{
+		trace('[Song] readJsonFromArchiveSystem: archive=$archivePath, file=$fileName');
+		#if !web
+		var tempDir:String = 'temp_extract_' + Math.round(Math.random() * 10000);
+		FileSystem.createDirectory(tempDir);
+
+		try
+		{
+			var ext:String = archivePath.toLowerCase();
+			var cmd:String = null;
+			var args:Array<String> = [];
+
+			if (ext.endsWith('.7z'))
+			{
+				cmd = '7z';
+				args = ['e', '-y', archivePath, '-o' + tempDir];
+			}
+			else if (ext.endsWith('.tar.xz') || ext.endsWith('.tar.zx') || ext.endsWith('.tar.gz') || ext.endsWith('.tgz') || ext.endsWith('.tar'))
+			{
+				cmd = 'tar';
+				if (ext.endsWith('.xz') || ext.endsWith('.zx'))
+					args = ['-xJf', archivePath, '-C', tempDir];
+				else if (ext.endsWith('.gz') || ext.endsWith('.tgz'))
+					args = ['-xzf', archivePath, '-C', tempDir];
+				else
+					args = ['-xf', archivePath, '-C', tempDir];
+			}
+
+			if (cmd != null)
+			{
+				var proc = new Process(cmd, args);
+				proc.exitCode(); // block until the extraction is done
+
+				// Try to find the extracted file
+				var searchPath:String = '$tempDir/$fileName';
+				if (FileSystem.exists(searchPath))
+				{
+					var content:String = NativeFileSystem.getContentAnywhere(searchPath);
+					deleteDirectoryRecursive(tempDir);
+					return content;
+				}
+
+				// Search recursively in temp dir
+				for (file in FileSystem.readDirectory(tempDir))
+				{
+					var fullPath = '$tempDir/$file';
+					if (file == fileName)
+					{
+						var content:String = NativeFileSystem.getContentAnywhere(fullPath);
+						deleteDirectoryRecursive(tempDir);
+						return content;
+					}
+				}
+			}
+		}
+		catch (e:Dynamic)
+		{
+			trace('System extraction failed: $archivePath - $e');
+		}
+
+		try { deleteDirectoryRecursive(tempDir); } catch (e:Dynamic) {}
+		#end
+
+		return null;
+	}
+
+	/**
+	 * Handles nested archives (e.g., .zip inside .7z, .tar inside .zip)
+	 */
+	static function readJsonFromNestedArchive(archivePath:String, fileName:String):Null<String>
+	{
+		trace('[Song] readJsonFromNestedArchive: archive=$archivePath, file=$fileName');
+		#if !web
+		var tempDir:String = 'temp_nested_' + Math.round(Math.random() * 10000);
+		FileSystem.createDirectory(tempDir);
+
+		try
+		{
+			var ext:String = archivePath.toLowerCase();
+			var cmd:String = null;
+			var args:Array<String> = [];
+
+			if (ext.endsWith('.7z'))
+			{
+				cmd = '7z';
+				args = ['e', '-y', archivePath, '-o' + tempDir];
+			}
+			else if (ext.endsWith('.tar.xz') || ext.endsWith('.tar.zx') || ext.endsWith('.tar.gz') || ext.endsWith('.tgz'))
+			{
+				cmd = 'tar';
+				if (ext.endsWith('.xz') || ext.endsWith('.zx'))
+					args = ['-xJf', archivePath, '-C', tempDir];
+				else if (ext.endsWith('.gz') || ext.endsWith('.tgz'))
+					args = ['-xzf', archivePath, '-C', tempDir];
+			}
+
+			if (cmd != null)
+			{
+				var proc = new Process(cmd, args);
+				proc.exitCode(); // block until the extraction is done
+
+				// Check if the target file was extracted
+				for (file in FileSystem.readDirectory(tempDir))
+				{
+					var fullPath = '$tempDir/$file';
+					if (file == fileName)
+					{
+						var content:String = NativeFileSystem.getContentAnywhere(fullPath);
+						deleteDirectoryRecursive(tempDir);
+						return content;
+					}
+
+					// If it's another archive, recursively extract it
+					if (file.endsWith('.zip') || file.endsWith('.7z') || file.endsWith('.tar.xz') || file.endsWith('.tar.gz'))
+					{
+						var nestedResult = readJsonFromArchive(fullPath, fileName);
+						if (nestedResult != null)
+						{
+							deleteDirectoryRecursive(tempDir);
+							return nestedResult;
+						}
+					}
+				}
+			}
+		}
+		catch (e:Dynamic)
+		{
+			trace('Nested archive extraction failed: $archivePath - $e');
+		}
+
+		try { deleteDirectoryRecursive(tempDir); } catch (e:Dynamic) {}
+		#end
+
+		return null;
 	}
 
 	public static function parseJSON(rawData:String, ?nameForError:String = null, ?convertTo:String = 'psych_v1'):SwagSong

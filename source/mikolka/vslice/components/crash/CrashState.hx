@@ -61,7 +61,7 @@ class CrashState extends FlxState
 		errMsg += 'Active mod: ${error.activeMod}\n';
 		errMsg += 'Platform: ${error.systemName}\n';
 		errMsg += '\n';
-		errMsg += '\nPlease report this error to the GitHub page: https://github.com/HRK-EXEX/H-Slice/\n\n> Crash Handler written by: sqirra-rng';
+		errMsg += '\nPlease report this error to the GitHub page: https://github.com/A-Slice-Productions/A-Slice/issues\n\n> Crash Handler written by: sqirra-rng';
 
 		#if !LEGACY_PSYCH
 		@:privateAccess // lazy

@@ -1,7 +1,11 @@
 package objects;
 
+import flixel.graphics.frames.FlxAtlasFrames;
+
 class CheckboxThingie extends FlxSprite
 {
+	static var _cachedFrames:FlxAtlasFrames = null;
+
 	public var sprTracker:FlxSprite;
 	public var daValue(default, set):Bool;
 	public var copyAlpha:Bool = true;
@@ -10,7 +14,9 @@ class CheckboxThingie extends FlxSprite
 	public function new(x:Float = 0, y:Float = 0, ?checked = false) {
 		super(x, y);
 
-		frames = Paths.getSparrowAtlas('checkboxanim');
+		if(_cachedFrames == null || _cachedFrames.parent == null || _cachedFrames.parent.bitmap == null || _cachedFrames.parent.isDestroyed || _cachedFrames.parent.shader == null)
+			_cachedFrames = Paths.getSparrowAtlas('checkboxanim');
+		frames = _cachedFrames;
 		animation.addByPrefix("unchecked", "checkbox0", 24, false);
 		animation.addByPrefix("unchecking", "checkbox anim reverse", 24, false);
 		animation.addByPrefix("checking", "checkbox anim0", 24, false);
@@ -36,12 +42,13 @@ class CheckboxThingie extends FlxSprite
 	}
 
 	private function set_daValue(check:Bool):Bool {
+		var curAnimName:String = (animation.curAnim != null) ? animation.curAnim.name : null;
 		if(check) {
-			if(animation.curAnim.name != 'checked' && animation.curAnim.name != 'checking') {
+			if(curAnimName != 'checked' && curAnimName != 'checking') {
 				animation.play('checking', true);
 				offset.set(34, 25);
 			}
-		} else if(animation.curAnim.name != 'unchecked' && animation.curAnim.name != 'unchecking') {
+		} else if(curAnimName != 'unchecked' && curAnimName != 'unchecking') {
 			animation.play("unchecking", true);
 			offset.set(25, 28);
 		}
