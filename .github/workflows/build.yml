@@ -1,87 +1,133 @@
-name: Build All Targets
+# This is a basic workflow to help you get started with Actions
+
+name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, experimental ]
+  pull_request:
+    branches: [ main, experimental ]
   workflow_dispatch:
 
-# Grant write permissions globally so called reusable workflows can use them
-permissions:
-  contents: write
-  actions: write
-
 jobs:
-  build-windows:
-    uses: ./.github/workflows/reusable-build.yml
-    permissions:
-      contents: write
-      actions: write
-    with:
-      name: Windows
-      os: windows-latest
-      buildArgs: windows
-      artifactName: A-Slice-Windows
-      artifactPath: export/release/windows/bin/
-      cachePath: cache-windows
-      cacheLibrariesPath: cache-haxelib
-      exportPath: windows
+  buildLinux:
+    runs-on: ubuntu-latest
 
-  build-linux:
-    uses: ./.github/workflows/reusable-build.yml
-    permissions:
-      contents: write
-      actions: write
-    with:
-      name: Linux
-      os: ubuntu-latest
-      buildArgs: linux
-      artifactName: A-Slice-Linux
-      artifactPath: export/release/linux/bin/
-      cachePath: cache-linux
-      cacheLibrariesPath: cache-haxelib
-      exportPath: linux
+    steps:
+      - uses: actions/checkout@v4.1.7
 
-  build-macos:
-    uses: ./.github/workflows/reusable-build.yml
-    permissions:
-      contents: write
-      actions: write
-    with:
-      name: macOS
-      os: macos-latest
-      buildArgs: macos
-      artifactName: A-Slice-macOS
-      artifactPath: export/release/macos/bin/
-      cachePath: cache-macos
-      cacheLibrariesPath: cache-haxelib
-      exportPath: macos
+      - uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.4
 
-  build-android:
-    uses: ./.github/workflows/reusable-build.yml
-    permissions:
-      contents: write
-      actions: write
-    with:
-      name: Android
-      os: ubuntu-latest
-      buildArgs: android
-      artifactName: A-Slice-Android
-      artifactPath: export/release/android/bin/
-      cachePath: cache-android
-      cacheLibrariesPath: cache-haxelib
-      exportPath: android
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: ~/haxelib
+          key: ${{ runner.os }}-haxelib-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-haxelib-
 
-  build-ios:
-    uses: ./.github/workflows/reusable-build.yml
-    permissions:
-      contents: write
-      actions: write
-    with:
-      name: iOS
-      os: macos-latest
-      buildArgs: ios
-      artifactName: A-Slice-iOS
-      artifactPath: export/release/ios/bin/
-      cachePath: cache-ios
-      cacheLibrariesPath: cache-haxelib
-      exportPath: ios
+      - name: Install Haxelib
+        run: |
+          sudo apt-get install libvlc-dev libvlccore-dev
+          haxelib setup ~/haxelib
+          haxelib install hxcpp > /dev/null --quiet
+          chmod +x ./setup/unix.sh
+          sh ./setup/unix.sh
+
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
+
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+
+      - name: Compile
+        run: haxelib run lime build Project.xml linux --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linuxBuild
+          path: 'export/release/linux/bin'
+
+  buildWindows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4.1.7
+
+      - uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.4
+
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: C:\haxelib
+          key: ${{ runner.os }}-haxelib-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-haxelib-
+
+      - name: Install Haxelib
+        run: |
+          haxelib setup C:/haxelib
+          haxelib install hxcpp > /dev/null --quiet
+          .\"setup/windows.bat"
+        shell: cmd
+
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> %USERPROFILE%/settings.cocoa
+        shell: cmd
+
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+
+      - name: Compile
+        run: haxelib run lime build windows --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: windowsBuild
+          path: export/release/windows/bin
+
+  buildMac:
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4.1.7
+
+      - uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.4
+
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: ~/haxelib
+          key: ${{ runner.os }}-haxelib-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-haxelib-
+
+      - name: Install Haxelib
+        run: |
+          haxelib setup ~/haxelib
+          haxelib install hxcpp > /dev/null --quiet
+          chmod +x ./setup/unix.sh
+          sh ./setup/unix.sh
+
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
+
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+
+      - name: Compile
+        run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: macBuild
+          path: export/release/macos/bin
