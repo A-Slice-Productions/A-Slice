@@ -283,9 +283,9 @@ class NativeFileSystem
 	}
 
 	#if (linux || ios)
-		/**
+	/**
 	 * Returns a path to the existing file similar to the given one.
-	 * (For instance "mod/firelight" and  "Mod/FireLight" are *similar* paths)
+	 * Case-insensitive path matching for Linux and iOS filesystems.
 	 * @param path The path to find
 	 * @return Null<String> Found path or null if such doesn't exist
 	 */
@@ -320,6 +320,44 @@ class NativeFileSystem
 		return nextDir;
 	}
 
+	/**
+	 * Searches a given directory and returns a name of the existing file/directory
+	 * *similar* to the **key**
+	 * @param dir Base directory to search
+	 * @param key The file/directory you want to find
+	 * @return Either a file name, or null if the one doesn't exist
+	 */
+	private static function findNode(dir:String, key:String):Null<String> {
+		try {
+			var allFiles:Array<String> = sys.FileSystem.readDirectory(dir);
+			var fileMap:Map<String, String> = new Map();
+
+			for (file in allFiles) {
+				fileMap.set(file.toLowerCase(), file);
+			}
+
+			return fileMap.get(key.toLowerCase());
+		} catch (e:Dynamic) {
+			return null;
+		}
+	}
+	#else
+
+	/**
+	 * Returns a path to the existing file similar to the given one.
+	 * Simple exact-match version for non-Linux/non-iOS platforms.
+	 * @param path
+	 * @return Null<String>
+	 */
+	public static function getPathLike(path:String):Null<String>
+	{
+		var cwd_path = addCwd(path);
+		if (sys.FileSystem.exists(cwd_path))
+			return cwd_path;
+		return null;
+	}
+	#end
+
 	public static function getBytes(path:String):Null<Bytes>
 	{
 		var isModded = path.startsWith("mods");
@@ -340,11 +378,7 @@ class NativeFileSystem
 		var sys_path = getPathLike(path);
 		if (sys_path != null)
 		{
-			#if windows
 			var result = sys.io.File.getBytes(sys_path);
-			#else
-			var result = sys.io.File.getBytes(sys_path);
-			#end
 			return result;
 		}
 		#end
@@ -402,42 +436,4 @@ class NativeFileSystem
 		#end
 		return null;
 	}
-	
-	/**
-	 * Searches a given directory and returns a name of the existing file/directory
-	 * *similar* to the **key**
-	 * @param dir Base directory to search
-	 * @param key The file/directory you want to find
-	 * @return Either a file name, or null if the one doesn't exist
-	 */
-	private static function findNode(dir:String, key:String):Null<String> {
-		try {
-			var allFiles:Array<String> = sys.FileSystem.readDirectory(dir);
-			var fileMap:Map<String, String> = new Map();
-
-			for (file in allFiles) {
-				fileMap.set(file.toLowerCase(), file);
-			}
-
-			return fileMap.get(key.toLowerCase());
-		} catch (e:Dynamic) {
-			return null;
-		}
-	}
-	#else
-
-	/**
-	 * Returns a path to the existing file similar to the given one.
-	 * (For instance "mod/firelight" and  "Mod/FireLight" are *similar* paths)
-	 * @param path
-	 * @return Null<String>
-	 */
-	public static function getPathLike(path:String):Null<String>
-	{
-		var cwd_path = addCwd(path);
-		if (sys.FileSystem.exists(cwd_path))
-			return cwd_path;
-		return null;
-	}
-	#end
 }
