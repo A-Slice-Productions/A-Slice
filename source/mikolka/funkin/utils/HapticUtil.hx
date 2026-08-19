@@ -3,7 +3,7 @@ package mikolka.funkin.utils;
 import mikolka.compatibility.VsliceOptions;
 import flixel.tweens.FlxTween;
 import flixel.math.FlxMath;
-#if mubile
+#if mobile
 import extension.haptics.Haptic;
 #end
 /**
@@ -61,13 +61,13 @@ class HapticUtil
         amplitudes[i] = amplitudeValue;
         sharpnesses[i] = sharpness;
       }
-      #if mubile
+      #if mobile
       Haptic.vibratePattern(durations, amplitudes, sharpnesses);
       #end
     }
     else
     {
-      #if mubile
+      #if mobile
       Haptic.vibrateOneShot(duration, amplitudeValue, sharpness);
       #end
     }

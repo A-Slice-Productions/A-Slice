@@ -450,10 +450,10 @@ class PlayState extends MusicBeatState
         // Less laggy controls
         private final keysArray:Array<Dynamic> = [
 
-		['note_1a'],
+		['note_1'],
 		['note_2a', 'note_2b'],
 		['note_3a', 'note_3b', 'note_3c'],
-		['note_4a', 'note_4b', 'note_4c', 'note_4d'],
+		['note_left', 'note_down', 'note_up', 'note_right'],
 		['note_5a', 'note_5b', 'note_5c', 'note_5d', 'note_5e'],
 		['note_6a', 'note_6b', 'note_6c', 'note_6d', 'note_6e', 'note_6f'],
 		['note_7a', 'note_7b', 'note_7c', 'note_7d', 'note_7e', 'note_7f', 'note_7g'],
