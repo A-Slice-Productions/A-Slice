@@ -1,0 +1,33 @@
+name: Build All Targets
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      name: Windows
+      os: windows-latest
+      buildArgs: windows
+      artifactName: A-Slice-Windows
+      artifactPath: export/release/windows/bin/
+      cachePath: cache-windows
+      cacheLibrariesPath: cache-haxelib
+      exportPath: windows
+
+  build-linux:
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      name: Linux
+      os: ubuntu-latest
+      buildArgs: linux
+      artifactName: A-Slice-Linux
+      artifactPath: export/release/linux/bin/
+      cachePath: cache-linux
+      cacheLibrariesPath: cache-haxelib
+      exportPath: linux
+
+  # Repeat similar blocks for macos, android, and ios
