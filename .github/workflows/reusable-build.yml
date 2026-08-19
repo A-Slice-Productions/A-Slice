@@ -32,79 +32,56 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: Build ${{ inputs.name }}
     runs-on: ${{ inputs.os }}
     permissions:
       contents: write
+      actions: write # Required for deleting cache entries via github-script
     steps:
       - name: Checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
 
       - name: Setup Haxe
         uses: krdlab/setup-haxe@master
         with:
           haxe-version: ${{ env.HAXE_VERSION }}
 
-      - name: Set XCode app
+      - name: Set Xcode Version
         if: inputs.os == 'macos-15'
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+        run: sudo xcode-select -s /Applications/Xcode_16.app
 
-      - name: Restore Libraries for compilation
+      - name: Restore Libraries
         id: load-lib-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ inputs.cacheLibrariesPath }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
-          path: |
-            .haxelib/
-          restore-keys: |
-            ${{ inputs.cacheLibrariesPath }}
+          path: .haxelib/
 
-      - name: Restore existing build cache for faster compilation
+      - name: Restore Build Cache
         id: load-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ inputs.cachePath }}
           path: |
             export/release/${{ inputs.exportPath }}/haxe/
             export/release/${{ inputs.exportPath }}/obj/
-          restore-keys: |
-            cache-build-${{ inputs.exportPath }}
 
       - name: Install libVLC
         if: inputs.exportPath == 'linux'
-        run: sudo apt install libvlc-dev libvlccore-dev
+        run: sudo apt-get update && sudo apt-get install -y libvlc-dev libvlccore-dev
 
       - name: Configure Android
         if: inputs.exportPath == 'android'
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_LATEST_HOME
-          haxelib run lime config JAVA_HOME $JAVA_HOME_17_arm64
+          haxelib run lime config JAVA_HOME $JAVA_HOME_17_X64
           haxelib run lime config ANDROID_SETUP true
 
       - name: Compile
         run: haxelib run lime build ${{ inputs.buildArgs }}
-
-      # To use this, add secrets 'A_SLICE_PASSWORD' and 'A_SLICE_KEYSTORE' to your repo secrets.
-      # - name: Sign APK with the proper key
-      #   if: inputs.exportPath == 'android'
-      #   env:
-      #     OUT_DIR: ./export/release/android/bin/app/build/outputs/apk/release/
-      #     SIGNING_KEY: ${{ secrets.A_SLICE_PASSWORD }}
-      #     SIGNING_ALIAS: hslice
-      #     SIGNING_FILE: ${{ secrets.A_SLICE_KEYSTORE }}
-      #   run: |
-      #     rm -f ./hslice.keystore;
-      #     echo $SIGNING_FILE | base64 -d > ./hslice.keystore;
-      #     sha256sum ./hslice.keystore;
-      #
-      #     mv '${{env.OUT_DIR}}A-Slice-release.apk' '${{env.OUT_DIR}}A-Slice-unsigned.apk';
-      #     $ANDROID_HOME/build-tools/35.0.1/zipalign -P 16 -f -v 4 '${{env.OUT_DIR}}A-Slice-unsigned.apk' '${{env.OUT_DIR}}A-Slice-release.apk' > /dev/null;
-      #
-      #     $ANDROID_HOME/build-tools/35.0.1/apksigner sign --ks hslice.keystore --ks-key-alias $SIGNING_ALIAS --ks-pass "env:SIGNING_KEY" --key-pass "env:SIGNING_KEY" '${{env.OUT_DIR}}A-Slice-release.apk';
-      #     rm '${{env.OUT_DIR}}A-Slice-unsigned.apk';
 
       - name: Make IPA
         if: inputs.name == 'iOS'
@@ -115,14 +92,14 @@ jobs:
           zip -r ${{ env.PROJECT_NAME }}.ipa Payload
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@main
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.artifactName }}
           path: ${{ inputs.artifactPath }}
-          if-no-files-found: error      
+          if-no-files-found: error
 
-      - name: Clearing already existing cache
-        uses: actions/github-script@v6
+      - name: Clear Old Cache
+        uses: actions/github-script@v7
         with:
           script: |
             try {
@@ -130,28 +107,23 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               });
-        
               for (const cache of caches.data.actions_caches) {
                 if (cache.key === "${{ inputs.cachePath }}") {
-                  console.log('Clearing ' + cache.key + '...');
                   await github.rest.actions.deleteActionsCacheById({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     cache_id: cache.id,
                   });
-                  console.log("Cache cleared.");
                 }
               }
             } catch (error) {
               console.error("Failed to clear cache:", error);
             }
 
-      - name: Uploading new cache
-        uses: actions/cache@v3
+      - name: Save New Cache
+        uses: actions/cache/save@v4
         with:
           key: ${{ inputs.cachePath }}
           path: |
             export/release/${{ inputs.exportPath }}/haxe/
             export/release/${{ inputs.exportPath }}/obj/
-          restore-keys: |
-            ${{ inputs.cachePath }}
