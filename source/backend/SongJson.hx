@@ -254,7 +254,11 @@ class SongJson {
 		}
 	}
 
+	var progressTick:Int = 0;
 	function showProgress(force:Bool = false) {
+		// only pay the Timer.stamp() cost every 256th call; it was called per
+		// char in the object/array loops, which is hot for large charts
+		if (!force && ((++progressTick & 255) != 0)) return;
 		if (force || Timer.stamp() - time > 0.01) {
 			if (log) {
 				if (ClientPrefs.data.numberFormat)
@@ -374,63 +378,60 @@ class SongJson {
 		}
 	}
 	
-	var minus:Bool; var digit:Bool; var zero:Bool;
-	var point:Bool = false; var e:Bool = false;
-	var pm:Bool = false; var end:Bool = false;
-	var f:Float; var i:Int;
+	var i:Int;
 	inline function parseNumber(c:Int):Dynamic {
 		start = pos - 1;
-		minus = c == '-'.code; digit = !minus; zero = c == '0'.code;
-		point = e = pm = end = false;
-		while (true) {
-			switch (c = nextChar()) {
-				case '0'.code:
-					if (zero && !point)
-						invalidNumber(start);
-					if (minus) {
-						minus = false;
-						zero = true;
-					}
-					digit = true;
-				case '1'.code, '2'.code, '3'.code, '4'.code, '5'.code, '6'.code, '7'.code, '8'.code, '9'.code:
-					if (zero && !point)
-						invalidNumber(start);
-					if (minus)
-						minus = false;
-					digit = true;
-					zero = false;
-				case '.'.code:
-					if (minus || point || e)
-						invalidNumber(start);
-					digit = false;
-					point = true;
-				case 'e'.code, 'E'.code:
-					if (minus || zero || e)
-						invalidNumber(start);
-					digit = false;
-					e = true;
-				case '+'.code, '-'.code:
-					if (!e || pm)
-						invalidNumber(start);
-					digit = false;
-					pm = true;
-				default:
-					if (!digit)
-						invalidNumber(start);
-					pos--;
-					end = true;
+		// Fast path: scan the number directly from char codes instead of
+		// substr + Std.parseFloat, which allocate a string per number. This is
+		// the hottest path for large charts full of numeric note data
+		// (an 880MB chart has ~150M numbers).
+		var neg:Bool = false;
+		if (c == '-'.code) { neg = true; c = nextChar(); }
+
+		var val:Float = 0;
+		var anyDigit:Bool = false;
+		while (c >= '0'.code && c <= '9'.code) {
+			val = val * 10 + (c - '0'.code);
+			anyDigit = true;
+			c = nextChar();
+		}
+		if (!anyDigit) invalidNumber(start);
+
+		var isFloat:Bool = false;
+		if (c == '.'.code) {
+			isFloat = true;
+			var div:Float = 10;
+			c = nextChar();
+			var frac:Bool = false;
+			while (c >= '0'.code && c <= '9'.code) {
+				val += (c - '0'.code) / div;
+				div *= 10;
+				frac = true;
+				c = nextChar();
 			}
-			if (end)
-				break;
+			if (!frac) invalidNumber(start);
 		}
 
-		f = Std.parseFloat(str.substr(start, pos - start));
-		if(point) {
-			return f;
-		} else {
-			i = Std.int(f);
-			return if (i == f) i else f;
+		if (c == 'e'.code || c == 'E'.code) {
+			c = nextChar();
+			var expNeg:Bool = false;
+			if (c == '+'.code) c = nextChar();
+			else if (c == '-'.code) { expNeg = true; c = nextChar(); }
+			var expVal:Int = 0;
+			while (c >= '0'.code && c <= '9'.code) {
+				expVal = expVal * 10 + (c - '0'.code);
+				c = nextChar();
+			}
+			val *= Math.pow(10, expNeg ? -expVal : expVal);
 		}
+
+		pos--; // one char past the number was consumed
+		if (neg) val = -val;
+		if (!isFloat) {
+			i = Std.int(val);
+			return if (i == val) i else val;
+		}
+		return val;
 	}
 
 	inline function nextChar() {

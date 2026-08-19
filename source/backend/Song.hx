@@ -206,18 +206,18 @@ class Song
 		if(rawData == null && ClientPrefs.data.jsonZipReader)
 		{
 			trace('[Song] jsonZipReader enabled, trying archives...');
-			var archiveExtensions:Array<String> = ['.zip', '.7z', '.tar.xz', '.tar.gz', '.tar.zx', '.tgz'];
-			// `_lastPath` points at `song.json`; also try the plain `song` archive name
-			// (e.g. both `tutorial.json.zip` and `tutorial.zip`).
-			var archiveBase:String = _lastPath;
-			if (archiveBase.endsWith('.json'))
-				archiveBase = archiveBase.substring(0, archiveBase.length - 5);
-			var archiveNames:Array<String> = [_lastPath, archiveBase];
-			for (name in archiveNames)
+			var archiveExtensions:Array<String> = ['.zip', '.7z', '.tar.xz', '.tar.gz', '.tar.zx', '.tgz', '.tar'];
+			// Resolve WITH the extension attached so mod charts
+			// (mods/<mod>/data/.../<song>.zip) are matched: modFolders checks the
+			// full file name, and a base name without an extension never matches.
+			// Both the plain `song` and `song.json` archive names are tried
+			// (e.g. `tutorial.zip` and `tutorial.json.zip`).
+			var nameVariants:Array<String> = ['$formattedSong', '$formattedSong.json'];
+			for (nameVar in nameVariants)
 			{
 				for (ext in archiveExtensions)
 				{
-					var archivePath:String = name + ext;
+					var archivePath:String = Paths.getPath('data/$formattedFolder/$nameVar$ext');
 					trace('[Song] Checking archive: $archivePath exists=${NativeFileSystem.existsAnywhere(archivePath)}');
 					if(NativeFileSystem.existsAnywhere(archivePath))
 					{
@@ -287,6 +287,15 @@ class Song
 	 */
 	static function readJsonFromArchive(archivePath:String, fileName:String):Null<String>
 	{
+		// For zips, system 7z inflates at C speed. Pure-Haxe haxe.zip inflate is
+		// ~10x slower on large charts (an 880MB chart took ~10.5s vs <1s with 7z).
+		// Falls back to the native reader below if 7z is unavailable or fails.
+		if (archivePath.toLowerCase().endsWith('.zip'))
+		{
+			var sysResult = readJsonFromZipSystem(archivePath, fileName);
+			if (sysResult != null) return sysResult;
+		}
+
 		// Try native ZIP reading first
 		var result = readJsonFromZip(archivePath, fileName);
 		if (result != null) return result;
@@ -300,13 +309,89 @@ class Song
 	}
 
 	/**
+	 * Extracts a zip with the system 7z tool (C-speed inflate) and reads the
+	 * target JSON from the output. Nested archives are handled by
+	 * findInExtractedDir, exactly like the other system-extracted formats.
+	 */
+	static function readJsonFromZipSystem(zipPath:String, fileName:String):Null<String>
+	{
+		#if !web
+		var tempDir:String = 'temp_zip_sys_' + Math.round(Math.random() * 10000);
+		FileSystem.createDirectory(tempDir);
+		try
+		{
+			var proc = new Process('7z', ['e', '-y', zipPath, '-o' + tempDir]);
+			var code:Int = proc.exitCode();
+			// 0 = success, 1 = success with warnings
+			if (code == 0 || code == 1)
+			{
+				var content:String = findInExtractedDir(tempDir, fileName);
+				if (content != null)
+				{
+					deleteDirectoryRecursive(tempDir);
+					return content;
+				}
+			}
+		}
+		catch (e:Dynamic)
+		{
+			trace('System zip extraction failed: $zipPath - $e');
+		}
+		try { deleteDirectoryRecursive(tempDir); } catch (e:Dynamic) {}
+		#end
+		return null;
+	}
+
+	/**
+	 * Returns true if the file name is one of the supported archive formats.
+	 */
+	static function isArchiveFile(name:String):Bool
+	{
+		name = name.toLowerCase();
+		return name.endsWith('.zip') || name.endsWith('.7z') || name.endsWith('.tar.xz')
+			|| name.endsWith('.tar.gz') || name.endsWith('.tar.zx') || name.endsWith('.tgz')
+			|| name.endsWith('.tar');
+	}
+
+	/**
+	 * Recursively searches an extracted temp dir for the target JSON. Descends
+	 * into subdirectories and recursively opens any archive files it finds, so
+	 * arbitrarily nested archives (zip -> 7z -> tar.zx -> zip -> json) work.
+	 */
+	static function findInExtractedDir(tempDir:String, fileName:String):Null<String>
+	{
+		var files:Array<String> = FileSystem.readDirectory(tempDir);
+		for (file in files)
+		{
+			var fullPath:String = '$tempDir/$file';
+			if (FileSystem.isDirectory(fullPath))
+			{
+				var sub:String = findInExtractedDir(fullPath, fileName);
+				if (sub != null) return sub;
+				continue;
+			}
+			if (file == fileName)
+			{
+				var content:String = NativeFileSystem.getContentAnywhere(fullPath);
+				if (content != null) return content;
+				continue;
+			}
+			if (isArchiveFile(file))
+			{
+				var nestedResult:String = readJsonFromArchive(fullPath, fileName);
+				if (nestedResult != null) return nestedResult;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Native ZIP reading using haxe.zip
 	 */
 	static function readJsonFromZip(zipPath:String, fileName:String):Null<String>
 	{
 		trace('[Song] readJsonFromZip: path=$zipPath, file=$fileName');
 		var zipBytes:Bytes = NativeFileSystem.getBytesAnywhere(zipPath);
-		trace(zipBytes != null ? '[Song] getBytes result: ${zipBytes.length} bytes' : '[Song] getBytes result: null');
 		if (zipBytes == null) return null;
 
 		try
@@ -372,9 +457,7 @@ class Song
 		{
 			for (entry in entries)
 			{
-				if (entry.fileName.endsWith('.zip') || entry.fileName.endsWith('.7z') || entry.fileName.endsWith('.tar.xz')
-					|| entry.fileName.endsWith('.tar.gz') || entry.fileName.endsWith('.tar.zx') || entry.fileName.endsWith('.tgz')
-					|| entry.fileName.endsWith('.tar'))
+				if (isArchiveFile(entry.fileName))
 				{
 					var data:Bytes = entry.compressed ? inflateRaw(entry.data) : entry.data;
 					var name:String = entry.fileName.split('/').pop();
@@ -462,25 +545,12 @@ class Song
 				var proc = new Process(cmd, args);
 				proc.exitCode(); // block until the extraction is done
 
-				// Try to find the extracted file
-				var searchPath:String = '$tempDir/$fileName';
-				if (FileSystem.exists(searchPath))
+				// Find the JSON directly or through any nested archives/dirs
+				var content:String = findInExtractedDir(tempDir, fileName);
+				if (content != null)
 				{
-					var content:String = NativeFileSystem.getContentAnywhere(searchPath);
 					deleteDirectoryRecursive(tempDir);
 					return content;
-				}
-
-				// Search recursively in temp dir
-				for (file in FileSystem.readDirectory(tempDir))
-				{
-					var fullPath = '$tempDir/$file';
-					if (file == fileName)
-					{
-						var content:String = NativeFileSystem.getContentAnywhere(fullPath);
-						deleteDirectoryRecursive(tempDir);
-						return content;
-					}
 				}
 			}
 		}
@@ -530,27 +600,12 @@ class Song
 				var proc = new Process(cmd, args);
 				proc.exitCode(); // block until the extraction is done
 
-				// Check if the target file was extracted
-				for (file in FileSystem.readDirectory(tempDir))
+				// Find the JSON directly or through any nested archives/dirs
+				var content:String = findInExtractedDir(tempDir, fileName);
+				if (content != null)
 				{
-					var fullPath = '$tempDir/$file';
-					if (file == fileName)
-					{
-						var content:String = NativeFileSystem.getContentAnywhere(fullPath);
-						deleteDirectoryRecursive(tempDir);
-						return content;
-					}
-
-					// If it's another archive, recursively extract it
-					if (file.endsWith('.zip') || file.endsWith('.7z') || file.endsWith('.tar.xz') || file.endsWith('.tar.gz'))
-					{
-						var nestedResult = readJsonFromArchive(fullPath, fileName);
-						if (nestedResult != null)
-						{
-							deleteDirectoryRecursive(tempDir);
-							return nestedResult;
-						}
-					}
+					deleteDirectoryRecursive(tempDir);
+					return content;
 				}
 			}
 		}

@@ -2287,9 +2287,9 @@ class PlayState extends MusicBeatState
                 FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
                 FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
-                #if DISCORD_ALLOWED
-                // Updating Discord Rich Presence (with Time Left)
-                if (autoUpdateRPC) {
+				#if DISCORD_ALLOWED
+				// Updating Discord Rich Presence (with Time Left)
+				if (autoUpdateRPC && iconP2 != null) {
                         songText = '${SONG.song} ($storyDifficultyText)';
                         DiscordClient.changePresence(detailsText, songText, iconP2.getCharacter(), true, songLength);
                 }
@@ -2796,8 +2796,8 @@ swagNote.noteData |= gottaHitNote ? 1<<8 : 0; // mustHit
                 if (FlxG.autoPause && nanoPosition) nanoTime = CoolUtil.getNanoTime();
                 // trace(nanoTime);
 
-                super.onFocusLost();
-                if (!paused && health > 0 && autoUpdateRPC)
+				super.onFocusLost();
+				if (!paused && health > 0 && autoUpdateRPC && iconP2 != null)
                 {
                         songText = '${SONG.song} ($storyDifficultyText)';
                         DiscordClient.changePresence(detailsPausedText, songText, iconP2.getCharacter());
@@ -2808,10 +2808,10 @@ swagNote.noteData |= gottaHitNote ? 1<<8 : 0; // mustHit
         // Updating Discord Rich Presence.
         public var autoUpdateRPC:Bool = true; // performance setting for custom RPC things
 
-        function resetRPC(?showTime:Bool = false)
-        {
-                #if DISCORD_ALLOWED
-                if (!autoUpdateRPC) return;
+		function resetRPC(?showTime:Bool = false)
+		{
+			#if DISCORD_ALLOWED
+			if (!autoUpdateRPC || iconP2 == null) return;
                 
                 songText = '${SONG.song} ($storyDifficultyText)';
                 // trace(songText);
@@ -4643,12 +4643,12 @@ swagNote.noteData |= gottaHitNote ? 1<<8 : 0; // mustHit
                 }
                 openSubState(new PauseSubState());
 
-                #if DISCORD_ALLOWED
-                if (autoUpdateRPC) {
-                        songText = '${SONG.song} ($storyDifficultyText)';
-                        DiscordClient.changePresence(detailsPausedText, songText, iconP2.getCharacter());
-                }
-                #end
+				#if DISCORD_ALLOWED
+				if (autoUpdateRPC && iconP2 != null) {
+					songText = '${SONG.song} ($storyDifficultyText)';
+					DiscordClient.changePresence(detailsPausedText, songText, iconP2.getCharacter());
+				}
+				#end
         }
 
         public function openChartEditor()
