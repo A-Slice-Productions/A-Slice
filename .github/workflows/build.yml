@@ -5,9 +5,17 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Grant write permissions globally so called reusable workflows can use them
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   build-windows:
     uses: ./.github/workflows/reusable-build.yml
+    permissions:
+      contents: write
+      actions: write
     with:
       name: Windows
       os: windows-latest
@@ -20,6 +28,9 @@ jobs:
 
   build-linux:
     uses: ./.github/workflows/reusable-build.yml
+    permissions:
+      contents: write
+      actions: write
     with:
       name: Linux
       os: ubuntu-latest
@@ -30,4 +41,47 @@ jobs:
       cacheLibrariesPath: cache-haxelib
       exportPath: linux
 
-  # Repeat similar blocks for macos, android, and ios
+  build-macos:
+    uses: ./.github/workflows/reusable-build.yml
+    permissions:
+      contents: write
+      actions: write
+    with:
+      name: macOS
+      os: macos-latest
+      buildArgs: macos
+      artifactName: A-Slice-macOS
+      artifactPath: export/release/macos/bin/
+      cachePath: cache-macos
+      cacheLibrariesPath: cache-haxelib
+      exportPath: macos
+
+  build-android:
+    uses: ./.github/workflows/reusable-build.yml
+    permissions:
+      contents: write
+      actions: write
+    with:
+      name: Android
+      os: ubuntu-latest
+      buildArgs: android
+      artifactName: A-Slice-Android
+      artifactPath: export/release/android/bin/
+      cachePath: cache-android
+      cacheLibrariesPath: cache-haxelib
+      exportPath: android
+
+  build-ios:
+    uses: ./.github/workflows/reusable-build.yml
+    permissions:
+      contents: write
+      actions: write
+    with:
+      name: iOS
+      os: macos-latest
+      buildArgs: ios
+      artifactName: A-Slice-iOS
+      artifactPath: export/release/ios/bin/
+      cachePath: cache-ios
+      cacheLibrariesPath: cache-haxelib
+      exportPath: ios
